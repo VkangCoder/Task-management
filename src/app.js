@@ -25,6 +25,13 @@ app.use(compression());
 app.use(express.json()); // Used to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); //Parse URL-encoded bodies
 //handle error
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: "error",
+    code: 404,
+    messages: "Not Found",
+  });
+});
 
 app.use((error, req, res, next) => {
   const status = error.status || 500;
