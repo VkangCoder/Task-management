@@ -11,7 +11,7 @@ const {
 } = require("./core/error.response");
 
 const path = require("path");
-const AuthRoutes = require("./api/v1/Routes/auth_routes");
+const AuthRoutes = require("./api/v1/routes/auth_routes");
 
 const app = express();
 app.use(
