@@ -3,7 +3,7 @@ const {
   LoginUserService,
   refreshTokenService,
 } = require("../services/auth_service.js");
-const { OK, CREATED } = require("../../../core/error.response.js");
+const { OK, CREATED } = require("../../../core/success.response.js");
 module.exports = {
   AuthLoginController: async (req, res, next) => {
     new OK({

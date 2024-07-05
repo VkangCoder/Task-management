@@ -4,14 +4,14 @@ const argon2 = require("argon2");
 const {
   BadRequestError,
   ConflictRequestError,
-} = require("../../core/error.response");
+} = require("../../../core/error.response");
 const {
   SignAccessToken,
   signRefreshToken,
   verifyRefreshToken,
 } = require("../services/jwt_service");
 module.exports = {
-  RegisterUserService: async (user, userId) => {
+  RegisterUserService: async (user, UserId) => {
     const holderUser = await prisma.users.findMany({
       where: {
         email: user.email,
@@ -24,22 +24,20 @@ module.exports = {
     const passwordHash = await argon2.hash(user.password, 10);
     const newUser = await prisma.users.create({
       data: {
-        username: user.username,
+        fullname: user.fullname,
         email: user.email,
         password: passwordHash,
-        franchies_id: user.franchies_id,
-        role_id: user.role_id,
-        status: user.status,
-        created_by: userId,
+        // franchies_id: user.franchies_id,
+        // department_id: user.department_id,
+        // role_id: user.role_id,
+        // status: user.status,
+        created_by: UserId,
       },
     });
 
     return newUser;
   },
   LoginUserService: async (user) => {
-    // Giả sử userValidate là một hàm bạn đã định nghĩa để validate thông tin người dùng// Bạn cần cung cấp định nghĩa cho hàm này
-    console.log(user);
-    // Tìm người dùng dựa trên email thay vì username (tùy thuộc vào schema của bạn)
     const foundUser = await prisma.users.findUnique({
       where: {
         email: user.email,
@@ -51,7 +49,7 @@ module.exports = {
     }
 
     // Kiểm tra mật khẩu
-    const isValid = await bcrypt.compare(user.password, foundUser.password);
+    const isValid = await argon2.verify(foundUser.password, user.password);
     if (!isValid) {
       throw new BadRequestError("Invalid password");
     }

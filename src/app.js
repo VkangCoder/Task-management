@@ -4,11 +4,15 @@ const { default: helmet } = require("helmet");
 const morgan = require("morgan");
 const Database = require("./dbs/init.postgresql.lv0");
 const cors = require("cors");
+
 const {
   BadRequestError,
   ConflictRequestError,
 } = require("./core/error.response");
+
 const path = require("path");
+const AuthRoutes = require("./api/v1/Routes/auth_routes");
+
 const app = express();
 app.use(
   cors({
@@ -16,15 +20,17 @@ app.use(
   })
 );
 
-//init db
-const db = new Database();
-//
 app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
 app.use(express.json()); // Used to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); //Parse URL-encoded bodies
-//handle error
+
+//init db
+const db = new Database();
+//init routes
+app.use("/v1/auth", AuthRoutes);
+// handle error
 app.use((req, res, next) => {
   res.status(404).json({
     status: "error",
@@ -33,6 +39,7 @@ app.use((req, res, next) => {
   });
 });
 
+//
 app.use((error, req, res, next) => {
   const status = error.status || 500;
   return res.status(status).json({
