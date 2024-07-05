@@ -11,7 +11,7 @@ const asyncHandler = require("../../../middleware/handleError");
 //   validateUserLogin,
 // } = require("../../middleware/validatevalidateAuth/");
 
-const { verifyAccessToken } = require("../../v1/services/jwt_service");
+const { verifyAccessToken } = require("../services/jwt_service");
 
 AuthRoutes.post(
   "/register",
