@@ -38,7 +38,7 @@ module.exports = {
     return newUser;
   },
   LoginUserService: async (user) => {
-    const foundUser = await prisma.users.findUnique({
+    const foundUser = await prisma.users.findFirst({
       where: {
         email: user.email,
       },
