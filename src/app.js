@@ -12,6 +12,7 @@ const {
 
 const path = require("path");
 const AuthRoutes = require("./api/v1/routes/auth_routes");
+const { TaskRoutes } = require("./api/v1/routes/task_routes");
 
 const app = express();
 app.use(
@@ -30,6 +31,7 @@ app.use(express.urlencoded({ extended: true })); //Parse URL-encoded bodies
 const db = new Database();
 //init routes
 app.use("/v1/auth", AuthRoutes);
+app.use("/v1/tasks", TaskRoutes);
 // handle error
 app.use((req, res, next) => {
   res.status(404).json({

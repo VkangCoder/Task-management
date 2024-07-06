@@ -92,9 +92,10 @@ model task_status {
   task_id      Int
   updated_by   Int
   updated_time DateTime? @default(now()) @db.Timestamp(6)
-  status       Boolean?
-  tasks        tasks     @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  status       Boolean
+  // tasks        tasks     @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users        users     @relation(fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tasks_current tasks[]  @relation("current_task_status")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -104,17 +105,21 @@ model tasks {
   description                    String?
   assignee_id                    Int?
   priority                       String?       @db.VarChar(100)
-  created_by                     Int?
-  created_at                     DateTime?     @db.Timestamp(6)
-  end_at                         DateTime?     @db.Timestamp(6)
+  created_by                     Int
+  created_at                     DateTime      @default(now()) @db.Timestamp(6)
+  end_at                         DateTime   @db.Timestamp(6)
   updated_by                     Int?
   updated_at                     DateTime?     @db.Timestamp(6)
-  status                         Int?
+  current_status_id              Int         // Thêm cột này để lưu trữ trạng thái hiện tại của task
+
+  status                         Boolean
   comments                       comments[]
-  task_status                    task_status[]
+  // task_status                    task_status[]
   users_tasks_assignee_idTousers users?        @relation("tasks_assignee_idTousers", fields: [assignee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_tasks_created_byTousers  users?        @relation("tasks_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_tasks_updated_byTousers  users?        @relation("tasks_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  task_status_current            task_status?  @relation("current_task_status", fields: [current_status_id], references: [id])
+  
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
