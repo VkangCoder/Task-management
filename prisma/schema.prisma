@@ -89,44 +89,39 @@ model task_status {
   description  String?
   old_value    String?
   new_value    String?
-  task_id      Int
+  task_id      Int?
   updated_by   Int
   updated_time DateTime? @default(now()) @db.Timestamp(6)
   status       Boolean
-  // tasks        tasks     @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users        users     @relation(fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  tasks_current tasks[]  @relation("current_task_status")
+  tasks        tasks[]   @relation("current_task_status")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model tasks {
-  id                             Int           @id @default(autoincrement())
-  title                          String        @db.VarChar(100)
+  id                             Int         @id @default(autoincrement())
+  title                          String      @db.VarChar(100)
   description                    String?
   assignee_id                    Int?
-  priority                       String?       @db.VarChar(100)
+  priority                       String?     @db.VarChar(100)
   created_by                     Int
-  created_at                     DateTime      @default(now()) @db.Timestamp(6)
-  end_at                         DateTime   @db.Timestamp(6)
+  created_at                     DateTime    @default(now()) @db.Timestamp(6)
+  end_at                         DateTime    @db.Timestamp(6)
   updated_by                     Int?
-  updated_at                     DateTime?     @db.Timestamp(6)
-  current_status_id              Int         // Thêm cột này để lưu trữ trạng thái hiện tại của task
-
+  updated_at                     DateTime?   @db.Timestamp(6)
+  current_status_id              Int
   status                         Boolean
   comments                       comments[]
-  // task_status                    task_status[]
-  users_tasks_assignee_idTousers users?        @relation("tasks_assignee_idTousers", fields: [assignee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_tasks_created_byTousers  users?        @relation("tasks_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_tasks_updated_byTousers  users?        @relation("tasks_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  task_status_current            task_status?  @relation("current_task_status", fields: [current_status_id], references: [id])
-  
+  users_tasks_assignee_idTousers users?      @relation("tasks_assignee_idTousers", fields: [assignee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_tasks_created_byTousers  users       @relation("tasks_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  task_status_current            task_status @relation("current_task_status", fields: [current_status_id], references: [id])
+  users_tasks_updated_byTousers  users?      @relation("tasks_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model users {
   id                                                  Int                @id @default(autoincrement())
   fullname                                            String             @db.VarChar(50)
-  password                                            String             @db.VarChar(255)
   birthday                                            DateTime?          @db.Date
   user_img                                            String?            @db.VarChar(255)
   gender                                              Int?               @db.SmallInt
@@ -141,6 +136,7 @@ model users {
   updated_by                                          Int?
   updated_at                                          DateTime?          @default(now()) @db.Timestamp(6)
   status                                              Boolean?
+  password                                            String             @db.VarChar(255)
   comments_comments_created_byTousers                 comments[]         @relation("comments_created_byTousers")
   comments_comments_updated_byTousers                 comments[]         @relation("comments_updated_byTousers")
   comments_comments_user_idTousers                    comments[]         @relation("comments_user_idTousers")
