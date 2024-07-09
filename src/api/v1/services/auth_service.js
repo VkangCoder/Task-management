@@ -10,8 +10,17 @@ const {
   signRefreshToken,
   verifyRefreshToken,
 } = require("../services/jwt_service");
+const {
+  validateRefRole,
+  validateRefDepartment,
+} = require("../../../middleware/validate/validateReferencer");
 module.exports = {
   RegisterUserService: async (user, UserId) => {
+    //validate ref role
+    await validateRefRole(user.role_id);
+    //validate ref department
+    await validateRefDepartment(user.department_id);
+    //Check email có tồn tại trước chưa nếu trùng ko cho tạo mới
     const holderUser = await prisma.users.findMany({
       where: {
         email: user.email,
@@ -21,7 +30,9 @@ module.exports = {
     if (holderUser.length > 0) {
       throw new ConflictRequestError("Error: User already registered!");
     }
+    //hash password
     const passwordHash = await argon2.hash(user.password, 10);
+    //Tạo user
     const newUser = await prisma.users.create({
       data: {
         fullname: user.fullname,
@@ -29,8 +40,6 @@ module.exports = {
         password: passwordHash,
         // franchies_id: user.franchies_id,
         department_id: user.department_id,
-        //drop bảng departmnet
-        //drop role
         role_id: user.role_id,
         status: true,
         created_by: UserId,

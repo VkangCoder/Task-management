@@ -6,6 +6,9 @@ const {
 } = require("../../../core/error.response");
 const { format } = require("date-fns");
 const { buildWhereClause } = require("../../../utils/searchUtils");
+const {
+  validatedUserId,
+} = require("../../../middleware/validate/validateReferencer");
 module.exports = {
   getAllTasksService: async (queryParams) => {
     const { filterField, operator, value, page, limit } = queryParams;
@@ -99,37 +102,38 @@ module.exports = {
   // },
   createTasksService: async (Tasks, userId) => {
     //check id assign
-
-    //check id current status
-    console.log(Tasks);
+    await validatedUserId(Tasks.assignee_id);
     //tạo 1 bản ghi mặc định status của 1 task sẽ là chưa tiếp nhận
-    const initialStatus = await prisma.task_status.create({
-      data: {
-        task_id: null, // Sẽ cập nhật sau khi task được tạo
-        old_value: "Chưa Tiếp Nhận", // Giả định không có trạng thái trước đó
-        new_value: "Chưa Tiếp Nhận",
-        updated_by: userId,
-        updated_time: new Date(),
-        status: true,
-        status_name: "Chưa Tiếp Nhận",
-      },
+    const result = await prisma.$transaction(async (prisma) => {
+      const initialStatus = await prisma.task_status.create({
+        data: {
+          task_id: null, // Sẽ cập nhật sau khi task được tạo
+          old_value: "Chưa Tiếp Nhận", // Giả định không có trạng thái trước đó
+          new_value: "Chưa Tiếp Nhận",
+          updated_by: userId,
+          updated_time: new Date(),
+          status: true,
+          status_name: "Chưa Tiếp Nhận",
+        },
+      });
+      //
+      const newTasks = await prisma.tasks.create({
+        data: {
+          title: Tasks.title,
+          description: Tasks.description,
+          //drop down tên nhân viên
+          assignee_id: Tasks.assignee_id,
+
+          priority: Tasks.priority,
+          created_by: userId,
+          end_at: new Date(Tasks.end_at), // sử dụng ngày hết hạn được cung cấp
+          current_status_id: initialStatus.id, // Thêm cột này để lưu trữ trạng thái hiện tại của task
+          status: true,
+        },
+      });
+      return newTasks;
     });
-    //
-    const newTasks = await prisma.tasks.create({
-      data: {
-        title: Tasks.title,
-        description: Tasks.description,
-        //drop down tên nhân viên
-        assignee_id: Tasks.assignee_id,
-        
-        priority: Tasks.priority,
-        created_by: userId,
-        end_at: new Date(Tasks.end_at), // sử dụng ngày hết hạn được cung cấp
-        current_status_id: initialStatus.id, // Thêm cột này để lưu trữ trạng thái hiện tại của task
-        status: true,
-      },
-    });
-    return newTasks;
+    return result;
   },
   receiveTaskService: async (Tasks, userId) => {
     //bước 1 tìm task cần nhận

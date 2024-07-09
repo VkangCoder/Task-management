@@ -8,7 +8,7 @@ const { format } = require("date-fns");
 const { buildWhereClause } = require("../../../utils/searchUtils");
 const { id } = require("date-fns/locale");
 module.exports = {
-  getAllDepartmentsService: async (queryParams) => {
+  getAllRolesService: async (queryParams) => {
     const { filterField, operator, value, page, limit } = queryParams;
 
     // Fetch all with pagination
@@ -16,24 +16,24 @@ module.exports = {
     const pageSize = parseInt(limit) || 10; // Mặc định 10 sản phẩm mỗi trang nếu không được cung cấp
     const skip = (pageNum - 1) * pageSize;
     const where = await buildWhereClause({ filterField, operator, value });
-    let Departments = await prisma.department.findMany({
+    let Roles = await prisma.roles.findMany({
       skip: skip,
       take: pageSize,
       where,
     });
-    Departments = Departments.map((department) => {
-      const formatdepartment = {
-        ...department,
+    Roles = Roles.map((role) => {
+      const formatrole = {
+        ...role,
       };
 
-      return formatdepartment;
+      return formatrole;
     });
-    if (Departments.length === 0) {
+    if (Roles.length === 0) {
       return [];
     }
-    return Departments;
+    return Roles;
   },
-  getAllListIdDepartmentsService: async (queryParams) => {
+  getAllListIdRolesService: async (queryParams) => {
     const { filterField, operator, value, page, limit } = queryParams;
 
     // Fetch all with pagination
@@ -41,33 +41,34 @@ module.exports = {
     const pageSize = parseInt(limit) || 10; // Mặc định 10 sản phẩm mỗi trang nếu không được cung cấp
     const skip = (pageNum - 1) * pageSize;
     const where = await buildWhereClause({ filterField, operator, value });
-    let Departments = await prisma.department.findMany({
+    let Roles = await prisma.roles.findMany({
       skip: skip,
       take: pageSize,
-      select: { id: true, department_name: true },
+      select: { id: true, role_name: true },
     });
-    Departments = Departments.map((department) => {
-      const formatdepartment = {
-        ...department,
+    Roles = Roles.map((role) => {
+      const formatrole = {
+        ...role,
       };
 
-      return formatdepartment;
+      return formatrole;
     });
-    if (Departments.length === 0) {
+    if (Roles.length === 0) {
       return [];
     }
-    return Departments;
+    return Roles;
   },
-  createDepartmentsService: async (Departments, userId) => {
+  createRolesService: async (Roles, userId) => {
     const result = await prisma.$transaction(async (prisma) => {
-      const newDepartment = await prisma.department.create({
+      const newrole = await prisma.roles.create({
         data: {
-          department_name: Departments.department_name,
+          role_name: Roles.role_name,
           created_by: userId,
+          status: true,
         },
       });
       //
-      return newDepartment;
+      return newrole;
     });
     return result;
   },
