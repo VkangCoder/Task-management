@@ -6,18 +6,15 @@ const {
   refreshTokenController,
 } = require("../controllers/auth_controller");
 const asyncHandler = require("../../../middleware/handleError");
-// const {
-//   validateUserRegistration,
-//   validateUserLogin,
-// } = require("../../middleware/validatevalidateAuth/");
 
 const { verifyAccessToken } = require("../services/jwt_service");
+const { checkRolePermission } = require("../../../middleware/role_middleware");
 
 AuthRoutes.post(
   "/register",
   verifyAccessToken,
 
-  // checkRolePermission("Create"),
+  checkRolePermission("Create"),
 
   asyncHandler(AuthRegisterController)
 );

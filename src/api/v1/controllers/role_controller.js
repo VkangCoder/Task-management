@@ -18,11 +18,4 @@ module.exports = {
       metadata: await createRolesService(req.body, UserId),
     }).send(res);
   },
-  receiveRolesController: async (req, res, next) => {
-    const UserId = req.payload.userId;
-    new OK({
-      message: "Get All Roles Succesful! : ",
-      metadata: await receiveRoleservice(req.body, UserId),
-    }).send(res);
-  },
 };

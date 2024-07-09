@@ -7,6 +7,7 @@ const {
   postCreateDepartmentsController,
 } = require("../controllers/department_controller");
 const asyncHandler = require("../../../middleware/handleError");
+const { checkRolePermission } = require("../../../middleware/role_middleware");
 const DepartmentsRoutes = express.Router();
 
 DepartmentsRoutes.get(
@@ -17,6 +18,7 @@ DepartmentsRoutes.get(
 DepartmentsRoutes.get(
   "/getAllListIdDepartments",
   verifyAccessToken,
+  checkRolePermission("Read"),
   asyncHandler(getAllListIdDepartmentsController)
 );
 DepartmentsRoutes.post(

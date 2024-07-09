@@ -26,7 +26,7 @@ module.exports = {
         users_tasks_assignee_idTousers: true,
         users_tasks_updated_byTousers: true,
         users_tasks_created_byTousers: true,
-        task_status_current: true,
+        task_status: true,
       },
     });
     Tasks = Tasks.map((task) => {
@@ -44,17 +44,17 @@ module.exports = {
 
         assignee_id: task.users_tasks_assignee_idTousers.fullname,
         //current_status cần phải update theo thời gian thực
-        current_status_id: task.task_status_current.status_name,
+        current_status_id: task.task_status.status_name,
         status_change: {
-          old_value: task.task_status_current.old_value, // Cần có cơ chế để truy xuất giá trị này
-          new_value: task.task_status_current.new_value, // Cần có cơ chế để truy xuất giá trị này
-          updated_by: task.task_status_current.updated_by,
+          old_value: task.task_status.old_value, // Cần có cơ chế để truy xuất giá trị này
+          new_value: task.task_status.new_value, // Cần có cơ chế để truy xuất giá trị này
+          updated_by: task.task_status.updated_by,
         },
       };
       delete formatTask.users_tasks_assignee_idTousers;
       delete formatTask.users_tasks_updated_byTousers;
       delete formatTask.users_tasks_created_byTousers;
-      delete formatTask.task_status_current;
+      delete formatTask.task_status;
 
       return formatTask;
     });

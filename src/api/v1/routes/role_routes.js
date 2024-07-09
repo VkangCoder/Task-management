@@ -6,11 +6,13 @@ const {
   getAllRolesController,
   createRolesController,
 } = require("../controllers/role_controller");
+const { checkRolePermission } = require("../../../middleware/role_middleware");
 const RoleRoutes = express.Router();
 
 RoleRoutes.get(
   "/getAllRoles",
   verifyAccessToken,
+  checkRolePermission("Read"),
   asyncHandler(getAllRolesController)
 );
 RoleRoutes.post(
