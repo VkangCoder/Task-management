@@ -5,10 +5,23 @@ const {
   receiveTaskController,
 } = require("../controllers/task_controller");
 const { verifyAccessToken } = require("../services/jwt_service");
+const asyncHandler = require("../../../middleware/handleError");
 const TaskRoutes = express.Router();
 
-TaskRoutes.get("/getAllTasks", verifyAccessToken, getAllTasksController);
-TaskRoutes.post("/createTasks", verifyAccessToken, createTaskController);
-TaskRoutes.post("/receiveTasks", verifyAccessToken, receiveTaskController);
+TaskRoutes.get(
+  "/getAllTasks",
+  verifyAccessToken,
+  asyncHandler(getAllTasksController)
+);
+TaskRoutes.post(
+  "/createTasks",
+  verifyAccessToken,
+  asyncHandler(createTaskController)
+);
+TaskRoutes.post(
+  "/receiveTasks",
+  verifyAccessToken,
+  asyncHandler(receiveTaskController)
+);
 
 module.exports = { TaskRoutes };

@@ -60,43 +60,43 @@ module.exports = {
     }
     return Tasks;
   },
-  getTasksStatusService: async (queryParams) => {
-    const { filterField, operator, value, page, limit } = queryParams;
+  // getTasksStatusService: async (queryParams) => {
+  //   const { filterField, operator, value, page, limit } = queryParams;
 
-    // Fetch all with pagination
-    const pageNum = parseInt(page) || 1; // Mặc định là trang 1 nếu không được cung cấp
-    const pageSize = parseInt(limit) || 10; // Mặc định 10 sản phẩm mỗi trang nếu không được cung cấp
-    const skip = (pageNum - 1) * pageSize;
-    const where = await buildWhereClause({ filterField, operator, value });
-    let Tasks = await prisma.task_status.findMany({
-      skip: skip,
-      take: pageSize,
-      where,
-    });
-    Tasks = Tasks.map((task) => {
-      const formatTask = {
-        ...task,
+  //   // Fetch all with pagination
+  //   const pageNum = parseInt(page) || 1; // Mặc định là trang 1 nếu không được cung cấp
+  //   const pageSize = parseInt(limit) || 10; // Mặc định 10 sản phẩm mỗi trang nếu không được cung cấp
+  //   const skip = (pageNum - 1) * pageSize;
+  //   const where = await buildWhereClause({ filterField, operator, value });
+  //   let Tasks = await prisma.task_status.findMany({
+  //     skip: skip,
+  //     take: pageSize,
+  //     where,
+  //   });
+  //   Tasks = Tasks.map((task) => {
+  //     const formatTask = {
+  //       ...task,
 
-        updated_time: task.updated_time
-          ? format(new Date(task.updated_time), "yyyy-MM-dd")
-          : "Not yet updated",
+  //       updated_time: task.updated_time
+  //         ? format(new Date(task.updated_time), "yyyy-MM-dd")
+  //         : "Not yet updated",
 
-        updated_by: task.users_tasks_updated_byTousers
-          ? task.users_tasks_updated_byTousers.fullname
-          : "Not yet updated",
-      };
-      delete formatTask.users_tasks_assignee_idTousers;
-      delete formatTask.users_tasks_updated_byTousers;
-      delete formatTask.users_tasks_created_byTousers;
-      delete formatTask.task_status_current;
+  //       updated_by: task.users_tasks_updated_byTousers
+  //         ? task.users_tasks_updated_byTousers.fullname
+  //         : "Not yet updated",
+  //     };
+  //     delete formatTask.users_tasks_assignee_idTousers;
+  //     delete formatTask.users_tasks_updated_byTousers;
+  //     delete formatTask.users_tasks_created_byTousers;
+  //     delete formatTask.task_status_current;
 
-      return formatTask;
-    });
-    if (Tasks.length === 0) {
-      return [];
-    }
-    return Tasks;
-  },
+  //     return formatTask;
+  //   });
+  //   if (Tasks.length === 0) {
+  //     return [];
+  //   }
+  //   return Tasks;
+  // },
   createTasksService: async (Tasks, userId) => {
     //check id assign
 
@@ -119,7 +119,9 @@ module.exports = {
       data: {
         title: Tasks.title,
         description: Tasks.description,
+        //drop down tên nhân viên
         assignee_id: Tasks.assignee_id,
+        
         priority: Tasks.priority,
         created_by: userId,
         end_at: new Date(Tasks.end_at), // sử dụng ngày hết hạn được cung cấp

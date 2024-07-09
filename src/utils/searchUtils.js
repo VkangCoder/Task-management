@@ -10,16 +10,9 @@ async function buildWhereClause({ filterField, operator, value }) {
   }
   //Nếu điều kiện Lọc nằm trong những cái dưới đây thì chuyển thành Số
   const numericFields = new Set([
-    "price_per_unit",
-    "total_price",
-    "price",
-    "vat",
-    "cost",
-    "discount",
-    "total_after_discount", 
     "updated_by", // Thêm trường này nếu là ID người dùng
     "created_by", // Thêm trường này nếu là ID người dùng
-    "floor_number",
+    "department_id",
   ]);
   if (numericFields.has(filterField)) {
     value = parseToNumber(value);

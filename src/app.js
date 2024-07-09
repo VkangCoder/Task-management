@@ -13,6 +13,8 @@ const {
 const path = require("path");
 const AuthRoutes = require("./api/v1/routes/auth_routes");
 const { TaskRoutes } = require("./api/v1/routes/task_routes");
+const { UserRoutes } = require("./api/v1/routes/user_routes");
+const { DepartmentsRoutes } = require("./api/v1/routes/department_route");
 
 const app = express();
 app.use(
@@ -32,6 +34,8 @@ const db = new Database();
 //init routes
 app.use("/v1/auth", AuthRoutes);
 app.use("/v1/tasks", TaskRoutes);
+app.use("/v1/users", UserRoutes);
+app.use("/v1/departments", DepartmentsRoutes);
 // handle error
 app.use((req, res, next) => {
   res.status(404).json({

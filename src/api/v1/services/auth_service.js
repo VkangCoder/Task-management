@@ -28,9 +28,11 @@ module.exports = {
         email: user.email,
         password: passwordHash,
         // franchies_id: user.franchies_id,
-        // department_id: user.department_id,
-        // role_id: user.role_id,
-        // status: user.status,
+        department_id: user.department_id,
+        //drop bảng departmnet
+        //drop role
+        role_id: user.role_id,
+        status: true,
         created_by: UserId,
       },
     });
