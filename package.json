@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "prerun": "npx prisma migrate deploy",
+    "prerun": "npx prisma db pull",
     "start": "node server.js"
   },
   "dependencies": {
