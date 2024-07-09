@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "prerun": "npx prisma migrate deploy"
+    "prerun": "npx prisma migrate deploy",
+    "start": "node server.js"
   },
   "dependencies": {
     "@prisma/client": "^5.16.1",
