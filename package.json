@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "prerun": "npx prisma db pull",
+    "prisma:pull": "npx prisma db pull",
+    "prestart": "npm run prisma:pull",
     "start": "node server.js"
   },
   "dependencies": {
