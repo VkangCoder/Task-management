@@ -4,6 +4,7 @@ const { default: helmet } = require("helmet");
 const morgan = require("morgan");
 const Database = require("./dbs/init.postgresql.lv0");
 const cors = require("cors");
+const fetch = require("node-fetch");
 
 const {
   BadRequestError,
@@ -60,10 +61,32 @@ app.use((error, req, res, next) => {
     messages: error.message || "Internal Server Error",
   });
 });
+// Trong file chính của ứng dụng Express, thêm:
+app.get("/v1/health", (req, res) => {
+  res.status(200).json({ status: "success", message: "Server is healthy" });
+});
 
 process.on("SIGINT", async () => {
   await db.disconnect();
   console.log("Application terminated, database connection closed.");
   process.exit(0);
 });
+
+const url = "https://task-management-be-ssq1.onrender.com/v1/health"; // Đường dẫn tới điểm endpoint kiểm tra sức khỏe của server
+
+function pingServer() {
+  console.log("Pinging server...");
+  fetch(url)
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error("Failed to reach the server");
+    })
+    .then((data) => console.log("Server response:", data))
+    .catch((error) => console.error("Error pinging server:", error));
+}
+
+// Hàm setInterval để gọi hàm pingServer mỗi 300000 milliseconds (5 minutes)
+setInterval(pingServer, 300000); // Đổi số này để thay đổi khoảng thời gian giữa các lần ping
 module.exports = app;
