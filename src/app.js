@@ -4,8 +4,7 @@ const { default: helmet } = require("helmet");
 const morgan = require("morgan");
 const Database = require("./dbs/init.postgresql.lv0");
 const cors = require("cors");
-const fetch = require("node-fetch");
-
+const axios = require("axios");
 const {
   BadRequestError,
   ConflictRequestError,
@@ -76,15 +75,14 @@ const url = "https://task-management-be-ssq1.onrender.com/v1/health"; // Đườ
 
 function pingServer() {
   console.log("Pinging server...");
-  fetch(url)
+  axios
+    .get(url)
     .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error("Failed to reach the server");
+      console.log("Server response:", response.data);
     })
-    .then((data) => console.log("Server response:", data))
-    .catch((error) => console.error("Error pinging server:", error));
+    .catch((error) => {
+      console.error("Error pinging server:", error);
+    });
 }
 
 // Hàm setInterval để gọi hàm pingServer mỗi 300000 milliseconds (5 minutes)
