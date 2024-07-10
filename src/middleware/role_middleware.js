@@ -6,8 +6,7 @@ module.exports = {
   checkRolePermission: (requiredPermission) => {
     return async (req, res, next) => {
       const { roleID } = req.payload;
-      console.log(roleID);
-      console.log(requiredPermission);
+
       const userPermission = await prisma.role_permissions.findMany({
         where: {
           role_id: roleID,

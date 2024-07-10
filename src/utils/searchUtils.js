@@ -43,14 +43,14 @@ async function buildWhereClause({ filterField, operator, value }) {
 
   //
 
-  if (filterField.endsWith("time")) {
-    // Chuyển đổi giá trị thành đối tượng Date
+  if (filterField.endsWith("at")) {
     value = new Date(value);
+    if (isNaN(value.getTime())) {
+      throw new BadRequestError("Invalid date value");
+    }
   } else if (filterField.endsWith("id")) {
-    // Đảm bảo giá trị là một số nguyên nếu trường là ID hoặc status
     value = parseInt(value);
   }
-
   switch (operator) {
     case "contains":
       where[filterField] = { contains: value, mode: "insensitive" };
