@@ -71,6 +71,7 @@ module.exports = {
     const pageSize = parseInt(limit) || 10; // Mặc định 10 sản phẩm mỗi trang nếu không được cung cấp
     const skip = (pageNum - 1) * pageSize;
     const where = await buildWhereClause({ filterField, operator, value });
+    //Lọc trên asignee_id
     if (UserId) {
       where.assignee_id = parseInt(UserId);
     }

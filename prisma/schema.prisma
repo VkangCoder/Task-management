@@ -137,12 +137,15 @@ model users {
   updated_at                                          DateTime?          @default(now()) @db.Timestamp(6)
   status                                              Boolean?
   password                                            String             @db.VarChar(255)
+  notification_id                                     Int?
   comments_comments_created_byTousers                 comments[]         @relation("comments_created_byTousers")
   comments_comments_updated_byTousers                 comments[]         @relation("comments_updated_byTousers")
   comments_comments_user_idTousers                    comments[]         @relation("comments_user_idTousers")
   department_department_created_byTousers             department[]       @relation("department_created_byTousers")
   menu_role_menu_role_created_byTousers               menu_role[]        @relation("menu_role_created_byTousers")
   menu_role_menu_role_updated_byTousers               menu_role[]        @relation("menu_role_updated_byTousers")
+  notification_notification_noti_receive_idTousers    notification[]     @relation("notification_noti_receive_idTousers")
+  notification_notification_noti_sender_idTousers     notification[]     @relation("notification_noti_sender_idTousers")
   role_permissions_role_permissions_created_byTousers role_permissions[] @relation("role_permissions_created_byTousers")
   role_permissions_role_permissions_updated_byTousers role_permissions[] @relation("role_permissions_updated_byTousers")
   roles_roles_created_byTousers                       roles[]            @relation("roles_created_byTousers")
@@ -154,4 +157,27 @@ model users {
   department_users_department_idTodepartment          department?        @relation("users_department_idTodepartment", fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_department")
   franchise                                           franchise?         @relation(fields: [franchise_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_franchise")
   roles_users_role_idToroles                          roles?             @relation("users_role_idToroles", fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_role")
+  notification                                        notification?      @relation(fields: [notification_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model notification {
+  id                                        Int                  @id @default(autoincrement())
+  noti_type                                 String               @db.VarChar(50)
+  noti_sender_id                            Int
+  noti_content                              String               @db.VarChar(50)
+  noti_receive_id                           Int
+  created_at                                DateTime?            @default(now()) @db.Timestamp(6)
+  notification_status_id                    Int?
+  status                                    Boolean?
+  users_notification_noti_receive_idTousers users                @relation("notification_noti_receive_idTousers", fields: [noti_receive_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_notification_noti_sender_idTousers  users                @relation("notification_noti_sender_idTousers", fields: [noti_sender_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  notification_status                       notification_status? @relation(fields: [notification_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                                     users[]
+}
+
+model notification_status {
+  id           Int            @id @default(autoincrement())
+  status_name  String?        @db.VarChar(30)
+  created_at   DateTime?      @default(now()) @db.Timestamp(6)
+  notification notification[]
 }
