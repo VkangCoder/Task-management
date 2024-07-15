@@ -9,6 +9,7 @@ const {
   validatedUserId,
 } = require("../../../middleware/validate/validateReferencer");
 const { format } = require("date-fns");
+const { createNotificationService } = require("./notification_service");
 
 module.exports = {
   getAllTasksService: async (queryParams) => {
@@ -121,17 +122,19 @@ module.exports = {
     return Tasks;
   },
   createTasksService: async (Tasks, userId) => {
+    //Bước 1 check validate các trường tham chiếu ( khóa ngoiaj)
     //check id assign
     const holderTaskEndAt = new Date(Tasks.end_at);
     const holderTaskCreateAt = new Date(); // Lấy ngày hiện tại từ server làm ngày tạo
     const formatHolderTaskCreateAt = format(holderTaskCreateAt, "yyyy-MM-dd");
     await validatedUserId(Tasks.assignee_id);
+    //Ngày hết hạn của task phải lớn hơn ngày hiện tại
     if (holderTaskEndAt <= holderTaskCreateAt) {
       throw new BadRequestError(
         `Ngày hết hạn của task phải lớn hơn ${formatHolderTaskCreateAt}`
       );
     }
-    //tạo 1 bản ghi mặc định status của 1 task sẽ là chưa tiếp nhận
+    //B2 : tạo 1 bản ghi mặc định status của 1 task sẽ là chưa tiếp nhận
     const result = await prisma.$transaction(async (prisma) => {
       const initialStatus = await prisma.task_status.create({
         data: {
@@ -145,6 +148,7 @@ module.exports = {
         },
       });
       //
+      //Bước 3 : tạo task với current_status vừa đc tạo nên
       const newTasks = await prisma.tasks.create({
         data: {
           title: Tasks.title,
@@ -159,45 +163,89 @@ module.exports = {
           status: true,
         },
       });
+
       return newTasks;
     });
+    //Sau khi tạo mới 1 task tạo thêm thông báo đi kèm
+
+    const notificationData = {
+      noti_type: "Task Assignment",
+      noti_content: `You have been assigned a new task: ${result.title}`,
+      noti_receive_id: result.assignee_id,
+      notification_status_id: 1, // Ví dụ status_id là 1 cho thông báo mới
+      noti_sender_id: result.created_by,
+    };
+    await createNotificationService(notificationData, result.created_by);
+
     return result;
   },
   receiveTaskService: async (Tasks, userId) => {
-    //bước 1 tìm task cần nhận
-    const task = await prisma.tasks.findUnique({
-      where: { id: Tasks.id },
-      include: { task_status_current: true },
-    });
-    if (!task) {
-      throw new BadRequestError("Task not found");
-    }
-    //bước 2 lấy ra trạng thái cũ của task đó
-    const oldStatus = task.task_status_current
-      ? task.task_status_current.new_value
-      : "Chưa Tiếp Nhận";
+    const result = await prisma.$transaction(async (prisma) => {
+      //bước 1 tìm task cần nhận
+      const task = await prisma.tasks.findUnique({
+        where: { id: Tasks.id },
+        include: { task_status: true },
+      });
+      if (!task) {
+        throw new BadRequestError("Task not found");
+      }
+      //bước 2 lấy ra trạng thái cũ của task đó
+      const oldStatus = task.task_status
+        ? task.task_status.new_value
+        : "Chưa Tiếp Nhận";
+      if (oldStatus === Tasks.new_value) {
+        throw new BadRequestError(
+          "Không cập nhật được trạng thái  `" +
+            Tasks.new_value +
+            "` vì nó trùng với trạng thái cũ của task "
+        );
+      }
+      //bước 3 tạo bản ghi để theo dõi sự cập nhật trạng thái của task đó
+      const statusChange = await prisma.task_status.create({
+        data: {
+          task_id: Tasks.id,
+          old_value: oldStatus,
+          new_value: Tasks.new_value,
+          updated_by: userId,
+          updated_time: new Date(),
+          status: true,
+          status_name: Tasks.new_value,
+        },
+      });
 
-    //bước 3 bản ghi để theo dõi sự cập nhật trạng thái của task đó
-    const statusChange = await prisma.task_status.create({
-      data: {
-        task_id: Tasks.id,
-        old_value: oldStatus,
-        new_value: Tasks.new_value,
-        updated_by: userId,
-        updated_time: new Date(),
-        status: true,
-        status_name: Tasks.new_value,
-      },
+      //bước 4: tạo thông báo đính kèm khi tiếp nhận hoặc trả task
+      const notificationData = {
+        noti_type: "Task Assignment",
+        noti_content:
+          "Người tiếp nhận đã cập nhật trạng thái của task `" +
+          task.title +
+          "` thành `" +
+          statusChange.new_value +
+          "`",
+        noti_receive_id: task.created_by,
+        notification_status_id: Tasks.notification_status_id, // Giả sử status_id là 1 cho trạng thái đã tiếp nhận
+        noti_sender_id: userId,
+      };
+      const notification = await createNotificationService(
+        notificationData,
+        userId
+      );
+      //
+      //bước 5: update current_task_id của Task đó thành mới nhất
+      const updateTask = await prisma.tasks.update({
+        where: { id: Tasks.id },
+        data: {
+          current_status_id: statusChange.id,
+
+          updated_by: userId,
+          // Cập nhật với ID của bản ghi trạng thái mới nhất
+        },
+      });
+      return {
+        success: true,
+        message: "Task đã được cập nhật và đã gửi thông báo tới người giao .",
+      };
     });
-    //bước 4 update current_task_id của Task đó thành mới nhất
-    const updateTask = await prisma.tasks.update({
-      where: { id: Tasks.id },
-      data: {
-        current_status_id: statusChange.id,
-        updated_by: userId,
-        // Cập nhật với ID của bản ghi trạng thái mới nhất
-      },
-    });
-    return updateTask;
+    return result;
   },
 };

@@ -162,9 +162,9 @@ model users {
 
 model notification {
   id                                        Int                  @id @default(autoincrement())
-  noti_type                                 String               @db.VarChar(50)
+  noti_type                                 String               @db.VarChar(100)
   noti_sender_id                            Int
-  noti_content                              String               @db.VarChar(50)
+  noti_content                              String               @db.VarChar(200)
   noti_receive_id                           Int
   created_at                                DateTime?            @default(now()) @db.Timestamp(6)
   notification_status_id                    Int?

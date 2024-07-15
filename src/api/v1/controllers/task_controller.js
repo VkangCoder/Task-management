@@ -29,7 +29,7 @@ module.exports = {
   receiveTaskController: async (req, res, next) => {
     const UserId = req.payload.userId;
     new OK({
-      message: "Get All Tasks Succesful! : ",
+      message: "Change Task Status Succesful! : ",
       metadata: await receiveTaskService(req.body, UserId),
     }).send(res);
   },

@@ -9,6 +9,7 @@ const {
   BadRequestError,
   ConflictRequestError,
 } = require("./core/error.response");
+const { runSocket, io } = require("./socket/socket");
 
 const path = require("path");
 const AuthRoutes = require("./api/v1/routes/auth_routes");
@@ -27,6 +28,13 @@ app.use(
     origin: "http://localhost:5173",
   })
 );
+//socket io
+// const server = http.createServer(app);
+
+// // Tích hợp Socket.IO
+// runSocket();
+// io.attach(server);
+//
 
 app.use(morgan("dev"));
 app.use(helmet());
