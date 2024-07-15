@@ -9,7 +9,6 @@ const {
   BadRequestError,
   ConflictRequestError,
 } = require("./core/error.response");
-const { runSocket, io } = require("./socket/socket");
 
 const path = require("path");
 const AuthRoutes = require("./api/v1/routes/auth_routes");
