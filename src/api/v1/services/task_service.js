@@ -174,7 +174,7 @@ module.exports = {
 
     const notificationData = {
       noti_type: "Task Assignment",
-      noti_content: `You have been assigned a new task: ${result.title}`,
+      noti_content: `Bạn đã được thêm 1 nhiệm vụ mới: ${result.title}`,
       noti_receive_id: result.assignee_id,
       notification_status_id: 1, // Ví dụ status_id là 1 cho thông báo mới
       noti_sender_id: result.created_by,

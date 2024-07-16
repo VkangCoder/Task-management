@@ -53,6 +53,9 @@ module.exports = {
       where: {
         email: user.email,
       },
+      include: {
+        roles_users_role_idToroles: true,
+      },
     });
 
     if (!foundUser) {
@@ -68,8 +71,16 @@ module.exports = {
     // Giả sử bạn có hàm SignAccessToken và signRefreshToken để tạo các token
     const accessToken = await SignAccessToken(foundUser.id, foundUser.role_id);
     const refreshToken = await signRefreshToken(foundUser.id);
-
-    return { accessToken, refreshToken };
+    const userName = foundUser.fullname;
+    const user_img = foundUser.user_img;
+    const roleName = foundUser.roles_users_role_idToroles.role_name;
+    return {
+      roleName,
+      userName,
+      user_img,
+      accessToken,
+      refreshToken,
+    };
   },
   refreshTokenService: async (refreshToken) => {
     if (!refreshToken) {
