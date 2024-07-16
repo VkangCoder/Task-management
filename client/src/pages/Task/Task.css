@@ -1,0 +1,11 @@
+/* Ẩn văn bản "Go to" */
+.ant-pagination-options-quick-jumper input::placeholder {
+    font-size: 0;
+}
+
+/* Thêm văn bản tiếng Việt */
+.ant-pagination-options-quick-jumper:before {
+    content: 'Đến trang';
+    font-size: 14px;
+    color: #666;
+}

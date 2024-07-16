@@ -1,0 +1,16 @@
+/* sidebar.css */
+.ant-menu-item:hover {
+    background-color: #152b3d !important;
+    color: #fff !important;
+}
+
+/* Kiểu cho mục menu được chọn */
+.ant-menu-item-selected {
+    background-color: #152b3d !important;
+    color: #fff !important;
+}
+
+.ant-menu-item-selected:hover {
+    background-color: #152b3d !important;
+    color: #fff !important;
+}
