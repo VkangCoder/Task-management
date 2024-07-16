@@ -10,6 +10,10 @@ const {
 } = require("../../../middleware/validate/validateReferencer");
 const { format } = require("date-fns");
 const { createNotificationService } = require("./notification_service");
+const TaskStatusCodes = {
+  2: "Đã tiếp nhận",
+  3: "Đã hoàn thành",
+};
 
 module.exports = {
   getAllTasksService: async (queryParams) => {
@@ -46,7 +50,7 @@ module.exports = {
 
         assignee_id: task.users_tasks_assignee_idTousers.fullname,
         //current_status cần phải update theo thời gian thực
-
+        current_status_id: task.task_status.status_name,
         status_change: {
           old_value: task.task_status.old_value, // Cần có cơ chế để truy xuất giá trị này
           new_value: task.task_status.new_value, // Cần có cơ chế để truy xuất giá trị này
@@ -102,7 +106,7 @@ module.exports = {
 
         assignee_id: task.users_tasks_assignee_idTousers.fullname,
         //current_status cần phải update theo thời gian thực
-
+        current_status_id: task.task_status.status_name,
         status_change: {
           old_value: task.task_status.old_value, // Cần có cơ chế để truy xuất giá trị này
           new_value: task.task_status.new_value, // Cần có cơ chế để truy xuất giá trị này
@@ -139,12 +143,12 @@ module.exports = {
       const initialStatus = await prisma.task_status.create({
         data: {
           task_id: null, // Sẽ cập nhật sau khi task được tạo
-          old_value: "Chưa Tiếp Nhận", // Giả định không có trạng thái trước đó
-          new_value: "Chưa Tiếp Nhận",
+          old_value: "Chưa tiếp nhận", // Giả định không có trạng thái trước đó
+          new_value: "Chưa tiếp nhận",
           updated_by: userId,
           updated_time: new Date(),
           status: true,
-          status_name: "Chưa Tiếp Nhận",
+          status_name: "Chưa tiếp nhận",
         },
       });
       //
@@ -189,10 +193,23 @@ module.exports = {
       if (!task) {
         throw new BadRequestError("Task not found");
       }
+      // biến đổi các enum 2 thành Đã tiếp nhận , 3 thành Đã hoàn thành
+      let newStatus;
+      switch (Tasks.new_value) {
+        case 2:
+          newStatus = "Đã tiếp nhận";
+          break;
+        case 3:
+          newStatus = "Đã hoàn thành";
+          break;
+        default:
+          throw new BadRequestError("Invalid status code");
+      }
+
       //bước 2 lấy ra trạng thái cũ của task đó
       const oldStatus = task.task_status
         ? task.task_status.new_value
-        : "Chưa Tiếp Nhận";
+        : "Chưa tiếp nhận";
       if (oldStatus === Tasks.new_value) {
         throw new BadRequestError(
           "Không cập nhật được trạng thái  `" +
@@ -200,16 +217,22 @@ module.exports = {
             "` vì nó trùng với trạng thái cũ của task "
         );
       }
+      //Ràng buộc ko thể chuyển từ chưa tiếp nhận thành đã hoàn thành
+      if (oldStatus === "Chưa tiếp nhận" && newStatus === "Đã hoàn thành") {
+        throw new BadRequestError(
+          "Không thể chuyển trực tiếp từ 'Chưa tiếp nhận' sang 'Đã hoàn thành'"
+        );
+      }
       //bước 3 tạo bản ghi để theo dõi sự cập nhật trạng thái của task đó
       const statusChange = await prisma.task_status.create({
         data: {
           task_id: Tasks.id,
           old_value: oldStatus,
-          new_value: Tasks.new_value,
+          new_value: newStatus,
           updated_by: userId,
           updated_time: new Date(),
           status: true,
-          status_name: Tasks.new_value,
+          status_name: newStatus,
         },
       });
 
