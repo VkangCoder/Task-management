@@ -6,7 +6,7 @@ const SignAccessToken = (userId, roleID) => {
   return new Promise((resolve, reject) => {
     const payload = { userId, roleID };
     const secret = process.env.ACCESS_TOKEN_SECRET;
-    const options = { expiresIn: "24h" };
+    const options = { expiresIn: "8h" };
 
     JWT.sign(payload, secret, options, (err, token) => {
       if (err) {

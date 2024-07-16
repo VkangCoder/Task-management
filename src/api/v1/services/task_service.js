@@ -46,7 +46,7 @@ module.exports = {
 
         assignee_id: task.users_tasks_assignee_idTousers.fullname,
         //current_status cần phải update theo thời gian thực
-        current_status_id: task.task_status.status_name,
+
         status_change: {
           old_value: task.task_status.old_value, // Cần có cơ chế để truy xuất giá trị này
           new_value: task.task_status.new_value, // Cần có cơ chế để truy xuất giá trị này
@@ -102,7 +102,7 @@ module.exports = {
 
         assignee_id: task.users_tasks_assignee_idTousers.fullname,
         //current_status cần phải update theo thời gian thực
-        current_status_id: task.task_status.status_name,
+
         status_change: {
           old_value: task.task_status.old_value, // Cần có cơ chế để truy xuất giá trị này
           new_value: task.task_status.new_value, // Cần có cơ chế để truy xuất giá trị này
