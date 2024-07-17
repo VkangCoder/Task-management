@@ -2,9 +2,9 @@ const JWT = require("jsonwebtoken");
 
 const client = require("../../../helpers/connect_redis");
 const { UnauthorizedError } = require("../../../core/error.response");
-const SignAccessToken = (userId, roleID) => {
+const SignAccessToken = (userId, roleID, parent_role_id) => {
   return new Promise((resolve, reject) => {
-    const payload = { userId, roleID };
+    const payload = { userId, roleID, parent_role_id };
     const secret = process.env.ACCESS_TOKEN_SECRET;
     const options = { expiresIn: "8h" };
 

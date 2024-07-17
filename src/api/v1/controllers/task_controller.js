@@ -21,9 +21,11 @@ module.exports = {
   },
   createTaskController: async (req, res, next) => {
     const UserId = req.payload.userId;
+    const UserParentRole = req.payload.parent_role_id;
+
     new CREATED({
       message: "Create  Tasks Succesful! : ",
-      metadata: await createTasksService(req.body, UserId),
+      metadata: await createTasksService(req.body, UserId, UserParentRole),
     }).send(res);
   },
   receiveTaskController: async (req, res, next) => {

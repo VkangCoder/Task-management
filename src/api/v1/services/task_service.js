@@ -10,6 +10,7 @@ const {
 } = require("../../../middleware/validate/validateReferencer");
 const { format } = require("date-fns");
 const { createNotificationService } = require("./notification_service");
+const { checkRoleParent } = require("../../../utils/checkParentRole");
 const TaskStatusCodes = {
   2: "Đã tiếp nhận",
   3: "Đã hoàn thành",
@@ -125,19 +126,27 @@ module.exports = {
     }
     return Tasks;
   },
-  createTasksService: async (Tasks, userId) => {
+  createTasksService: async (Tasks, userId, UserParentRole) => {
     //Bước 1 check validate các trường tham chiếu ( khóa ngoiaj)
-    //check id assign
-    const holderTaskEndAt = new Date(Tasks.end_at);
-    const holderTaskCreateAt = new Date(); // Lấy ngày hiện tại từ server làm ngày tạo
-    const formatHolderTaskCreateAt = format(holderTaskCreateAt, "yyyy-MM-dd");
     await validatedUserId(Tasks.assignee_id);
+
+    await checkRoleParent(UserParentRole, Tasks.assignee_id);
+
+    //check id assign
+    // ràng buộc ngày tạo task phải lớn hơn ngày hôm nay
+    const holderTaskEndAt = new Date(Tasks.end_at);
+    // Lấy ngày hiện tại từ server làm ngày tạo
+    const holderTaskCreateAt = new Date();
+
+    const formatHolderTaskCreateAt = format(holderTaskCreateAt, "yyyy-MM-dd");
+
     //Ngày hết hạn của task phải lớn hơn ngày hiện tại
     if (holderTaskEndAt <= holderTaskCreateAt) {
       throw new BadRequestError(
         `Ngày hết hạn của task phải lớn hơn ${formatHolderTaskCreateAt}`
       );
     }
+
     //B2 : tạo 1 bản ghi mặc định status của 1 task sẽ là chưa tiếp nhận
     const result = await prisma.$transaction(async (prisma) => {
       const initialStatus = await prisma.task_status.create({
