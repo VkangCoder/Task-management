@@ -9,6 +9,7 @@ export const taskTabButton = [
     { key: 'completed', label: 'Đã hoàn thành' },
     { key: 'deleted', label: 'Đã xóa' },
 ]
+
 // Định danh cột cho tab trang task
 export const taskColumns = [
     {
@@ -27,7 +28,7 @@ export const taskColumns = [
         dataIndex: 'priority',
         key: 'priority',
         render: priority => {
-            let backgroundColor = '#CC0000' //mặc định là cao
+            let backgroundColor = '#CC0000' //mặc định là Cao
             if (priority === 'Trung bình')
                 backgroundColor = '#DACF71' // Trung bình
             else if (priority === 'Thấp') backgroundColor = '#4DB134' // Thấp

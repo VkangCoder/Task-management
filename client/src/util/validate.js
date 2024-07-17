@@ -38,10 +38,10 @@ export const Authenticated = () => {
     return !!token
 }
 
-export const AuthenticatedUser = () => {
-    const token = localStorage.getItem('accessToken')
-    return !!token
-}
+// export const AuthenticatedUser = () => {
+//     const token = localStorage.getItem('accessToken')
+//     return !!token
+// }
 
 // export const user = () => {
 

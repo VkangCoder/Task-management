@@ -1,10 +1,36 @@
+import { useState } from 'react'
 import { Button } from 'antd'
 import AddIcon from '@mui/icons-material/Add'
-import { useState } from 'react'
+import AddModal from './AddModal'
+import { taskTabButton } from '../util/config'
 
 // eslint-disable-next-line react/prop-types
-function Tab({ buttonTitle }) {
+function Tab({ buttonTitle, onTabChange }) {
     const [activeView, setActiveView] = useState('all')
+    //Modal State
+    const [isModalVisible, setModalVisible] = useState(false)
+
+    const openModal = () => setModalVisible(true)
+    const closeModal = () => setModalVisible(false)
+
+    const handleTabClick = view => {
+        setActiveView(view)
+        onTabChange(view) // Gọi hàm onTabChange khi tab được thay đổi
+    }
+
+    const renderButton = tab => (
+        <Button
+            key={tab.key}
+            className={`custom-btn-action ${
+                activeView === tab.key ? 'selected' : ''
+            }`}
+            onClick={() => handleTabClick(tab.key)}
+            type="default"
+            style={{ marginRight: 12 }}>
+            {tab.label}
+        </Button>
+    )
+
     return (
         <div
             style={{
@@ -22,44 +48,7 @@ function Tab({ buttonTitle }) {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                 }}>
-                <div>
-                    <Button
-                        className={`custom-btn-action ${
-                            activeView === 'all' ? 'selected' : ''
-                        }`}
-                        onClick={() => setActiveView('all')}
-                        type="default"
-                        style={{ marginRight: 12 }}>
-                        Tất cả (4)
-                    </Button>
-                    <Button
-                        className={`custom-btn-action ${
-                            activeView === 'delivering' ? 'selected' : ''
-                        }`}
-                        onClick={() => setActiveView('delivering')}
-                        type="default"
-                        style={{ marginRight: 12 }}>
-                        Đang giao (2)
-                    </Button>
-                    <Button
-                        className={`custom-btn-action ${
-                            activeView === 'completed' ? 'selected' : ''
-                        }`}
-                        onClick={() => setActiveView('completed')}
-                        type="default"
-                        style={{ marginRight: 12 }}>
-                        Đã hoàn thành (1)
-                    </Button>
-                    <Button
-                        className={`custom-btn-action ${
-                            activeView === 'deleted' ? 'selected' : ''
-                        }`}
-                        onClick={() => setActiveView('deleted')}
-                        type="default"
-                        style={{ marginRight: 12 }}>
-                        Đã xóa (3)
-                    </Button>
-                </div>
+                <div>{taskTabButton.map(tab => renderButton(tab))}</div>
                 <Button
                     className="custom-action-btn-add"
                     icon={<AddIcon />}
@@ -67,12 +56,18 @@ function Tab({ buttonTitle }) {
                         width: 126,
                         height: 44,
                     }}
-                    type="primary">
+                    type="primary"
+                    onClick={openModal}>
                     {buttonTitle}
                 </Button>
             </div>
+            <AddModal
+                modalTitle={'Thêm Nhiệm Vụ'}
+                isVisible={isModalVisible}
+                onOpen={openModal}
+                onClose={closeModal}
+            />
         </div>
     )
 }
-
 export default Tab

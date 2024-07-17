@@ -1,20 +1,26 @@
 import { useEffect, useState } from 'react'
-import { Layout, Button, Input, Table, Space, Tag } from 'antd'
+// import { Layout, Button, Input, Table, Space, Tag } from 'antd'
+import { Layout, Input, Table } from 'antd'
 import HeaderComponent from '../../components/HeaderComponent'
-import Tab from '../../pages/Task/Tab.jsx'
 import './Task.css'
 import * as AuthService from '../../util/validate.js'
 import CustomPagination from '../../components/CustomPagination.jsx'
 import { taskColumns } from '../../util/config.jsx'
+import Tab from '../../components/Tab.jsx'
 const { Search } = Input
 
 function Task() {
     const [taskData, setTaskData] = useState([])
+
+    /* --------------------- Fetch Data dựa trên current_status_id ---------------------*/
     const [filteredData, setFilteredData] = useState([])
-    const [activeView, setActiveView] = useState('all') // Trạng thái activeView để lọc
+    // Trạng thái activeView để lọc
+    const [activeView, setActiveView] = useState('all')
     const [page, setPage] = useState(1)
+
     const pageLimit = 10
 
+    /* --------------------- Fetch Data ---------------------*/
     useEffect(() => {
         const fetchData = async () => {
             if (!AuthService.Authenticated()) {
@@ -33,30 +39,32 @@ function Task() {
                         },
                     }
                 )
-
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`)
                 }
-
                 const data = await response.json()
                 if (data && Array.isArray(data.metadata)) {
                     setTaskData(data.metadata)
-                    filterTasks(data.metadata, activeView) // Lọc dữ liệu sau khi fetch
+                    // Lọc dữ liệu sau khi fetch và kích hoạt view  current_status_id
+                    filterTasks(data.metadata, activeView)
                     console.log(data.metadata)
                 } else {
                     console.error(
-                        'Expected an array of products, but received:',
+                        'Expected an array of Task, but received:',
                         data
                     )
                 }
             } catch (error) {
-                console.error('Error fetching products:', error)
+                console.error('Error fetching Task:', error)
             }
         }
 
         fetchData()
     }, [page, activeView])
 
+    /* --------------------- Fetch Data Sau Khi thêm ---------------------*/
+
+    // Bộ lộc current_status_id
     const filterTasks = (tasks, view) => {
         let filtered = tasks
         if (view !== 'all') {
@@ -78,8 +86,9 @@ function Task() {
         setFilteredData(filtered)
     }
 
+    /* --------------------- Lọc dữ liệu mỗi khi activeView thay đổi ---------------------*/
     useEffect(() => {
-        filterTasks(taskData, activeView) // Lọc dữ liệu mỗi khi activeView thay đổi
+        filterTasks(taskData, activeView)
     }, [activeView, taskData])
 
     return (

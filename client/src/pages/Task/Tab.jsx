@@ -3,9 +3,15 @@ import { Button } from 'antd'
 import AddIcon from '@mui/icons-material/Add'
 import { useState } from 'react'
 import { taskTabButton } from '../../util/config'
+import AddModal from '../../components/AddModal'
 
 function Tab({ buttonTitle, onTabChange }) {
     const [activeView, setActiveView] = useState('all')
+    //Modal State
+    const [isModalVisible, setModalVisible] = useState(false)
+
+    const openModal = () => setModalVisible(true)
+    const closeModal = () => setModalVisible(false)
 
     const handleTabClick = view => {
         setActiveView(view)
@@ -50,10 +56,17 @@ function Tab({ buttonTitle, onTabChange }) {
                         width: 126,
                         height: 44,
                     }}
-                    type="primary">
+                    type="primary"
+                    onClick={openModal}>
                     {buttonTitle}
                 </Button>
             </div>
+            <AddModal
+                modalTitle={'Thêm Nhiệm Vụ'}
+                isVisible={isModalVisible}
+                onOpen={openModal}
+                onClose={closeModal}
+            />
         </div>
     )
 }
