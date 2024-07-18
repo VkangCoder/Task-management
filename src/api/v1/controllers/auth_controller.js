@@ -4,6 +4,8 @@ const {
   refreshTokenService,
 } = require("../services/auth_service.js");
 const { OK, CREATED } = require("../../../core/success.response.js");
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
 module.exports = {
   AuthLoginController: async (req, res, next) => {
     new OK({
@@ -13,9 +15,12 @@ module.exports = {
   },
   AuthRegisterController: async (req, res, next) => {
     const UserId = req.payload.userId;
+    const file = req.file;
+    console.log(req.body);
+    console.log(file);
     new CREATED({
       message: "Register OK!",
-      metadata: await RegisterUserService(req.body, UserId),
+      metadata: await RegisterUserService(req.body, UserId, file),
     }).send(res);
   },
   refreshTokenController: async (req, res, next) => {

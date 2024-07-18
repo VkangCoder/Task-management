@@ -14,12 +14,19 @@ const {
   validateRefRole,
   validateRefDepartment,
 } = require("../../../middleware/validate/validateReferencer");
+const { uploadFileToStorage } = require("../../../utils/storagaeUtils");
+
 module.exports = {
-  RegisterUserService: async (user, UserId) => {
+  RegisterUserService: async (user, UserId, file) => {
+    if (!file) {
+      throw new BadRequestError("No file uploaded.");
+    }
+    const departmentID = parseInt(user.department_id);
+    const roleID = parseInt(user.role_id);
     //validate ref role
-    await validateRefRole(user.role_id);
+    await validateRefRole(roleID);
     //validate ref department
-    await validateRefDepartment(user.department_id);
+    await validateRefDepartment(departmentID);
     //Check email có tồn tại trước chưa nếu trùng ko cho tạo mới
     const holderUser = await prisma.users.findMany({
       where: {
@@ -33,19 +40,28 @@ module.exports = {
     //hash password
     const passwordHash = await argon2.hash(user.password, 10);
     //Tạo user
+    const imageUrl = await uploadFileToStorage(
+      file,
+      "image/" + file.originalname
+    );
+    console.log(imageUrl);
+    // if (!imageUrl) throw new BadRequestError("Ko upload ảnh được");
+
     const newUser = await prisma.users.create({
       data: {
         fullname: user.fullname,
         email: user.email,
         password: passwordHash,
+        //Ví dụ upload ảnh ở đây
+        user_img: imageUrl,
         // franchies_id: user.franchies_id,
-        department_id: user.department_id,
-        role_id: user.role_id,
+        department_id: departmentID,
+        role_id: roleID,
         status: true,
         created_by: UserId,
       },
     });
-
+    if (!newUser) throw BadRequestError("Có lỗi trong việc thêm 1 user");
     return newUser;
   },
   LoginUserService: async (user) => {

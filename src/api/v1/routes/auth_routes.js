@@ -6,14 +6,16 @@ const {
   refreshTokenController,
 } = require("../controllers/auth_controller");
 const asyncHandler = require("../../../middleware/handleError");
-
+const multer = require("multer");
+const storage = multer.memoryStorage(); // Lưu file tạm thời trong bộ nhớ
+const upload = multer({ storage: storage });
 const { verifyAccessToken } = require("../services/jwt_service");
 const { checkRolePermission } = require("../../../middleware/role_middleware");
 
 AuthRoutes.post(
   "/register",
   verifyAccessToken,
-
+  upload.single("user_img"),
   checkRolePermission("Create"),
 
   asyncHandler(AuthRegisterController)
