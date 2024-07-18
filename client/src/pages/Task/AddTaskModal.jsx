@@ -9,14 +9,14 @@ import {
     Typography,
     Button,
 } from 'antd'
-import * as AuthService from '../util/validate'
+import * as AuthService from '../../util/validate'
 
 //Lấy các thành phần cụ thể từ các đối tượng và gán vào các biến mới
 const { TextArea } = Input
 const { Option } = Select
 const { Title } = Typography
 
-function AddModal({ modalTitle, isVisible, onClose }) {
+function AddTaskModal({ modalTitle, isVisible, onClose, onTaskAdded }) {
     const [confirmLoading, setConfirmLoading] = useState(false)
     const [getDepartmentId, setGetDepartmentId] = useState([])
     const [getUserByDepartment, setGetUserByDepartment] = useState([])
@@ -57,6 +57,10 @@ function AddModal({ modalTitle, isVisible, onClose }) {
             form.resetFields()
             // Đóng modal sau khi thêm thành công
             onClose()
+            // Gọi callback truyền từ cha
+            if (onTaskAdded) {
+                onTaskAdded()
+            }
         } catch (error) {
             console.error('Error creating task:', error)
             if (error.response) {
@@ -279,4 +283,4 @@ function AddModal({ modalTitle, isVisible, onClose }) {
     )
 }
 
-export default AddModal
+export default AddTaskModal

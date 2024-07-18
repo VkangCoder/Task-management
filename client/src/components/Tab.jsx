@@ -1,17 +1,12 @@
+/* eslint-disable react/prop-types */
 import { useState } from 'react'
 import { Button } from 'antd'
 import AddIcon from '@mui/icons-material/Add'
-import AddModal from './AddModal'
+// import AddModal from './AddModal'
 import { taskTabButton } from '../util/config'
 
-// eslint-disable-next-line react/prop-types
-function Tab({ buttonTitle, onTabChange }) {
+function Tab({ buttonTitle, onTabChange, onClick }) {
     const [activeView, setActiveView] = useState('all')
-    //Modal State
-    const [isModalVisible, setModalVisible] = useState(false)
-
-    const openModal = () => setModalVisible(true)
-    const closeModal = () => setModalVisible(false)
 
     const handleTabClick = view => {
         setActiveView(view)
@@ -57,16 +52,10 @@ function Tab({ buttonTitle, onTabChange }) {
                         height: 44,
                     }}
                     type="primary"
-                    onClick={openModal}>
+                    onClick={onClick}>
                     {buttonTitle}
                 </Button>
             </div>
-            <AddModal
-                modalTitle={'Thêm Nhiệm Vụ'}
-                isVisible={isModalVisible}
-                onOpen={openModal}
-                onClose={closeModal}
-            />
         </div>
     )
 }

@@ -7,16 +7,23 @@ import * as AuthService from '../../util/validate.js'
 import CustomPagination from '../../components/CustomPagination.jsx'
 import { taskColumns } from '../../util/config.jsx'
 import Tab from '../../components/Tab.jsx'
+import AddTaskModal from './AddTaskModal.jsx'
 const { Search } = Input
 
 function Task() {
     const [taskData, setTaskData] = useState([])
-
-    /* --------------------- Fetch Data dựa trên current_status_id ---------------------*/
+    //Fetch Data dựa trên current_status_id và Trạng thái activeView để lọc
     const [filteredData, setFilteredData] = useState([])
-    // Trạng thái activeView để lọc
     const [activeView, setActiveView] = useState('all')
+    //Phân trang
     const [page, setPage] = useState(1)
+    //Mở Modal thêm
+    const [isModalVisible, setModalVisible] = useState(false)
+    // Refesh sau khi thêm data
+    const [refreshData, setRefreshData] = useState(false)
+
+    const openModal = () => setModalVisible(true)
+    const closeModal = () => setModalVisible(false)
 
     const pageLimit = 10
 
@@ -60,9 +67,7 @@ function Task() {
         }
 
         fetchData()
-    }, [page, activeView])
-
-    /* --------------------- Fetch Data Sau Khi thêm ---------------------*/
+    }, [page, activeView, refreshData])
 
     // Bộ lộc current_status_id
     const filterTasks = (tasks, view) => {
@@ -97,7 +102,11 @@ function Task() {
                 title="Quản Lý Nhiệm vụ"
                 subTitle="Các nhiệm vụ hiện có"
             />
-            <Tab buttonTitle={'Thêm task'} onTabChange={setActiveView} />
+            <Tab
+                buttonTitle={'Thêm task'}
+                onTabChange={setActiveView}
+                onClick={openModal}
+            />
             <Layout style={{ padding: '0 50px 0 50px' }}>
                 <Search
                     placeholder="Tìm kiếm tên, trạng thái task"
@@ -118,6 +127,15 @@ function Task() {
                     pageLimit={pageLimit}
                 />
             </Layout>
+            <AddTaskModal
+                modalTitle={'Thêm Nhiệm Vụ'}
+                isVisible={isModalVisible}
+                onClose={closeModal}
+                onTaskAdded={() => {
+                    setRefreshData(prev => !prev)
+                    closeModal()
+                }}
+            />
         </Layout>
     )
 }
