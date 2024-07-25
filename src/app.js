@@ -20,6 +20,7 @@ const {
   RolePermissionRoutes,
 } = require("./api/v1/routes/role_permissions_route");
 const { NotificationRoutes } = require("./api/v1/routes/notification_route");
+const { FileRoutes } = require("./api/v1/routes/upload_file.routes");
 
 const app = express();
 app.use(
@@ -51,6 +52,7 @@ app.use("/v1/departments", DepartmentsRoutes);
 app.use("/v1/roles", RoleRoutes);
 app.use("/v1/rolePermissions", RolePermissionRoutes);
 app.use("/v1/notification", NotificationRoutes);
+app.use("/v1/upload", FileRoutes);
 // handle error
 app.use((req, res, next) => {
   res.status(404).json({
