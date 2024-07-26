@@ -6,6 +6,9 @@ const {
 } = require("../../../core/error.response");
 const { format } = require("date-fns");
 const { buildWhereClause } = require("../../../utils/searchUtils");
+const {
+  validatedUserId,
+} = require("../../../middleware/validate/validateReferencer");
 module.exports = {
   getAllUsersService: async (queryParams) => {
     const { filterField, operator, value, page, limit } = queryParams;
@@ -53,5 +56,22 @@ module.exports = {
       return [];
     }
     return users;
+  },
+  updateUserByUserIdService: async (userData, userId) => {
+    await validatedUserId(userId);
+    const updatedUser = await prisma.users.update({
+      where: {
+        id: parseInt(userId),
+      },
+      data: {
+        fullname: userData.name,
+        email: userData.email,
+        birthday: userData.birthday,
+        gender: userData.gender,
+        address: userData.address,
+        email: userData.email,
+        birthday: userData.birthday,
+      },
+    });
   },
 };

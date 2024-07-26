@@ -4,6 +4,7 @@ const { verifyAccessToken } = require("../services/jwt_service");
 const {
   getAllUsersController,
   getAllUsersByDepartmentIdController,
+  updateUserInfoByUserIdController,
 } = require("../controllers/user_controller");
 const asyncHandler = require("../../../middleware/handleError");
 const { checkRolePermission } = require("../../../middleware/role_middleware");
@@ -19,6 +20,11 @@ UserRoutes.get(
   "/getAllUsersByDepartmentId",
   verifyAccessToken,
   asyncHandler(getAllUsersByDepartmentIdController)
+);
+UserRoutes.patch(
+  "/updateUserInfo/:userId",
+  verifyAccessToken,
+  asyncHandler(updateUserInfoByUserIdController)
 );
 
 module.exports = { UserRoutes };

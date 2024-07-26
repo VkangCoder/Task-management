@@ -1,7 +1,7 @@
 const {
-  RegisterUserService,
   LoginUserService,
   refreshTokenService,
+  RegisterUserSerivce,
 } = require("../services/auth_service.js");
 const { OK, CREATED } = require("../../../core/success.response.js");
 module.exports = {
@@ -13,11 +13,10 @@ module.exports = {
   },
   AuthRegisterController: async (req, res, next) => {
     const UserId = req.payload.userId;
-    const file = req.file;
-
+    console.log(UserId);
     new CREATED({
-      message: "Register OK!",
-      metadata: await RegisterUserService(req.body, UserId),
+      message: " Resgiter Succesfull",
+      metadata: await RegisterUserSerivce(req.body, UserId),
     }).send(res);
   },
   refreshTokenController: async (req, res, next) => {

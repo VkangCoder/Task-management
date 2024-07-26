@@ -11,7 +11,7 @@ module.exports = {
       },
     });
     if (!userExists) {
-      throw new NotFoundError("Id Người Giao task không tồn tại");
+      throw new NotFoundError("Id Người Dùng không tồn tại");
     }
     return userExists;
   },

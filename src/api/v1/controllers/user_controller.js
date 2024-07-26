@@ -17,4 +17,10 @@ module.exports = {
       metadata: await getUsersByDepartmentId(req.query),
     }).send(res);
   },
+  updateUserInfoByUserIdController: async (req, res, next) => {
+    new OK({
+      message: "Update Successful! : ",
+      metadata: await getUsersByDepartmentId(req.query),
+    }).send(res);
+  },
 };
