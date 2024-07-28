@@ -30,6 +30,7 @@ model department {
   manager_id                            Int?
   users_department_created_byTousers    users?    @relation("department_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_department_manager_idTousers    users?    @relation("department_manager_idTousers", fields: [manager_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_manager")
+  tasks                                 tasks[]
   users_users_department_idTodepartment users[]   @relation("users_department_idTodepartment")
 }
 
@@ -104,23 +105,21 @@ model task_status {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model tasks {
-  id                             Int         @id @default(autoincrement())
-  title                          String      @db.VarChar(100)
-  description                    String?
-  assignee_id                    Int?
-  priority                       String?     @db.VarChar(100)
-  created_by                     Int
-  created_at                     DateTime    @default(now()) @db.Timestamp(6)
-  end_at                         DateTime    @db.Timestamp(6)
-  updated_by                     Int?
-  updated_at                     DateTime?   @db.Timestamp(6)
-  current_status_id              Int
-  status                         Boolean
-  comments                       comments[]
-  users_tasks_assignee_idTousers users?      @relation("tasks_assignee_idTousers", fields: [assignee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_tasks_created_byTousers  users       @relation("tasks_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  task_status                    task_status @relation(fields: [current_status_id], references: [id])
-  users_tasks_updated_byTousers  users?      @relation("tasks_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                            Int         @id @default(autoincrement())
+  title                         String      @db.VarChar(100)
+  description                   String?
+  created_by                    Int
+  created_at                    DateTime    @default(now()) @db.Timestamp(6)
+  updated_by                    Int?
+  updated_at                    DateTime?   @db.Timestamp(6)
+  current_status_id             Int
+  status                        Boolean
+  department_id                 Int?
+  comments                      comments[]
+  department                    department? @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_department")
+  users_tasks_created_byTousers users       @relation("tasks_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  task_status                   task_status @relation(fields: [current_status_id], references: [id])
+  users_tasks_updated_byTousers users?      @relation("tasks_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -157,7 +156,6 @@ model users {
   roles_roles_created_byTousers                       roles[]            @relation("roles_created_byTousers")
   roles_roles_updated_byTousers                       roles[]            @relation("roles_updated_byTousers")
   task_status                                         task_status[]
-  tasks_tasks_assignee_idTousers                      tasks[]            @relation("tasks_assignee_idTousers")
   tasks_tasks_created_byTousers                       tasks[]            @relation("tasks_created_byTousers")
   tasks_tasks_updated_byTousers                       tasks[]            @relation("tasks_updated_byTousers")
   department_users_department_idTodepartment          department?        @relation("users_department_idTodepartment", fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_department")
