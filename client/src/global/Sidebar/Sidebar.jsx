@@ -4,7 +4,6 @@ import { Menu, Typography } from 'antd'
 import './sidebar.css'
 import InsertChartIcon from '@mui/icons-material/InsertChart'
 import TaskIcon from '@mui/icons-material/Task'
-import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify'
 import LockIcon from '@mui/icons-material/Lock'
 import HouseIcon from '@mui/icons-material/House'
 import PersonIcon from '@mui/icons-material/Person'
@@ -25,28 +24,23 @@ const menuItemsManagement = [
     },
     {
         key: '3',
-        icon: <FormatAlignJustifyIcon />,
-        label: 'Báo cáo',
-    },
-    {
-        key: '4',
         icon: <LockIcon />,
         label: 'Cấp Quyền',
     },
     {
-        key: '5',
+        key: '4',
         icon: <HouseIcon />,
         label: 'Phòng Ban',
     },
     {
-        key: '6',
+        key: '5',
         icon: <PersonIcon />,
         label: 'Người Dùng',
     },
 ]
 const menuItemsLogOut = [
     {
-        key: '7',
+        key: '6',
         icon: <LogoutIcon />,
         label: 'Đăng Xuất',
     },
@@ -75,18 +69,15 @@ function Sidebar() {
                 navigate('/admin/task', { replace: true })
                 break
             case '3':
-                navigate('/admin/form', { replace: true })
-                break
-            case '4':
                 navigate('/admin/role', { replace: true })
                 break
-            case '5':
+            case '4':
                 navigate('/admin/department', { replace: true })
                 break
-            case '6':
+            case '5':
                 navigate('/admin/user', { replace: true })
                 break
-            case '7':
+            case '6':
                 localStorage.clear()
                 navigate('/admin/logout', { replace: true })
                 break

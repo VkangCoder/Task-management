@@ -1,6 +1,5 @@
 import InsertChartIcon from '@mui/icons-material/InsertChart'
 import TaskIcon from '@mui/icons-material/Task'
-import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify'
 import LockIcon from '@mui/icons-material/Lock'
 import HouseIcon from '@mui/icons-material/House'
 import PersonIcon from '@mui/icons-material/Person'
@@ -22,21 +21,16 @@ export const menuItemsManagement = [
     },
     {
         key: '3',
-        icon: <FormatAlignJustifyIcon />,
-        label: 'Báo cáo',
-    },
-    {
-        key: '4',
         icon: <LockIcon />,
         label: 'Cấp Quyền',
     },
     {
-        key: '5',
+        key: '4',
         icon: <HouseIcon />,
         label: 'Phòng Ban',
     },
     {
-        key: '6',
+        key: '5',
         icon: <PersonIcon />,
         label: 'Người Dùng',
     },
@@ -54,7 +48,7 @@ export const menuItemsManagement = [
 
 export const menuItemsLogOut = [
     {
-        key: '7',
+        key: '8',
         icon: <LogoutIcon />,
         label: 'Đăng Xuất',
     },

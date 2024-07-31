@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-// import { Layout, Button, Input, Table, Space, Tag } from 'antd'
-import { Layout, Input, Table } from 'antd'
+import { Layout, Input, Table, Space, Button } from 'antd'
 import HeaderComponent from '../../components/HeaderComponent'
 import './Task.css'
 import * as AuthService from '../../util/validate.js'
@@ -8,6 +7,8 @@ import CustomPagination from '../../components/CustomPagination.jsx'
 import { taskColumns } from '../../util/config.jsx'
 import Tab from '../../components/Tab.jsx'
 import AddTaskModal from './AddTaskModal.jsx'
+import DetailTaskModal from './DetailTaskModal.jsx'
+
 const { Search } = Input
 
 function Task() {
@@ -17,17 +18,31 @@ function Task() {
     const [activeView, setActiveView] = useState('all')
     //Phân trang
     const [page, setPage] = useState(1)
-    //Mở Modal thêm
-    const [isModalVisible, setModalVisible] = useState(false)
+    //Các Modal
+    const [isModalVisible, setModalVisible] = useState(false) //Mở Modal thêm
+    const [isDetailModal, setIsDetailModal] = useState(false) //Mở Modal chi tiết
     // Refesh sau khi thêm data
     const [refreshData, setRefreshData] = useState(false)
-
+    //task đã chọn
+    const [selectedTask, setSelectedTask] = useState(null)
+    //Modal thêm
     const openModal = () => setModalVisible(true)
     const closeModal = () => setModalVisible(false)
+    //Modal chi tiết
+    const openModalDetail = () => setIsDetailModal(true)
+    const closeModalDetail = () => setIsDetailModal(false)
+    //State Search
+    const [search, setSearch] = useState('')
 
-    const pageLimit = 10
+    const pageLimit = 8
 
-    /* --------------------- Fetch Data ---------------------*/
+    // Mở chi tiết task đã chọn
+    const handleOpenDetailModal = task => {
+        setSelectedTask(task)
+        openModalDetail()
+    }
+
+    /* --------------------- Fetch Data và Fetch sau khi search ---------------------*/
     useEffect(() => {
         const fetchData = async () => {
             if (!AuthService.Authenticated()) {
@@ -37,8 +52,16 @@ function Task() {
 
             try {
                 const token = localStorage.getItem('accessToken')
+                const baseUrl =
+                    'https://task-management-be-ssq1.onrender.com/v1/tasks/getAllTasks'
+                let url = `${baseUrl}?page=${page}&limit=${pageLimit}`
+                if (search) {
+                    url += `&filterField=title&operator=contains&value=${search}`
+                }
+
                 const response = await fetch(
-                    `https://task-management-be-ssq1.onrender.com/v1/tasks/getAllTasks?page=${page}&limit=${pageLimit}`,
+                    url,
+                    // `https://task-management-be-ssq1.onrender.com/v1/tasks/getAllTasks?page=${page}&limit=${pageLimit}`,
                     {
                         method: 'GET',
                         headers: {
@@ -67,7 +90,7 @@ function Task() {
         }
 
         fetchData()
-    }, [page, activeView, refreshData])
+    }, [page, activeView, refreshData, search])
 
     // Bộ lộc current_status_id
     const filterTasks = (tasks, view) => {
@@ -109,11 +132,50 @@ function Task() {
             />
             <Layout style={{ padding: '0 50px 0 50px' }}>
                 <Search
-                    placeholder="Tìm kiếm tên, trạng thái task"
-                    style={{ marginBottom: 16, width: '100%' }}
+                    placeholder="Tìm kiếm tên nhiệm vụ"
+                    onSearch={value => setSearch(value)}
+                    style={{
+                        marginBottom: 16,
+                        width: '100%',
+                    }}
+                    enterButton
                 />
                 <Table
-                    columns={taskColumns}
+                    columns={taskColumns.map(col => {
+                        if (col.key === 'actions') {
+                            return {
+                                ...col,
+                                render: (_, task) => (
+                                    <Space>
+                                        <Button
+                                            onClick={() =>
+                                                handleOpenDetailModal(task)
+                                            }
+                                            style={{
+                                                border: '1px solid #152B3D',
+                                                width: '73px',
+                                                height: '26px',
+                                                color: '#152B3D',
+                                            }}
+                                            type="link">
+                                            Chi tiết
+                                        </Button>
+                                        <Button
+                                            style={{
+                                                border: '1px solid #CC0000',
+                                                width: '73px',
+                                                height: '26px',
+                                                color: '#CC0000',
+                                            }}
+                                            type="link">
+                                            Xóa
+                                        </Button>
+                                    </Space>
+                                ),
+                            }
+                        }
+                        return col
+                    })}
                     dataSource={filteredData.map(task => ({
                         ...task,
                         key: task.id,
@@ -135,6 +197,12 @@ function Task() {
                     setRefreshData(prev => !prev)
                     closeModal()
                 }}
+            />
+            <DetailTaskModal
+                modalTitle={'Chi Tiết Nhiệm Vụ'}
+                openDetail={isDetailModal}
+                onClose={closeModalDetail}
+                task={selectedTask}
             />
         </Layout>
     )

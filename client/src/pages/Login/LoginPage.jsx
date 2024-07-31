@@ -7,13 +7,14 @@ import {
     UserOutlined,
     LockOutlined,
 } from '@ant-design/icons'
-import { Button, Checkbox, Form, Input, Typography } from 'antd'
+import { Button, Checkbox, Form, Input, Typography, Alert } from 'antd'
 const { Title } = Typography
 import * as AuthService from '../../util/validate.js'
 
 function LoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [loginSuccess, setLoginSuccess] = useState(false)
     const showPassword = false
 
     const navigate = useNavigate()
@@ -28,10 +29,18 @@ function LoginPage() {
         checkLoggedIn()
     }, [navigate])
 
+    useEffect(() => {
+        if (loginSuccess) {
+            setTimeout(() => {
+                navigate('/admin')
+            }, 3000) // Chờ 2 giây trước khi chuyển trang
+        }
+    }, [loginSuccess, navigate])
+
     const handleLogin = async () => {
         const success = await AuthService.login(email, password)
         if (success) {
-            navigate('/admin')
+            setLoginSuccess(true)
         }
     }
 
@@ -44,6 +53,7 @@ function LoginPage() {
             </div>
 
             {/* ------------ Login Form ------------*/}
+
             <Form
                 style={{
                     background: '#fff',
@@ -112,6 +122,13 @@ function LoginPage() {
                             visible ? <EyeFilled /> : <EyeInvisibleFilled />
                         }
                     />
+                    {loginSuccess && (
+                        <Alert
+                            style={{ marginTop: 10 }}
+                            message="Đăng Nhập Thành Công"
+                            type="success"
+                        />
+                    )}
                 </Form.Item>
                 <Form.Item>
                     <Form.Item name="remember" valuePropName="checked" noStyle>

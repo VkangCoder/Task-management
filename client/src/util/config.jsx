@@ -7,40 +7,54 @@ export const taskTabButton = [
     { key: 'delivering', label: 'Chưa tiếp nhận' },
     { key: 'received', label: 'Đã tiếp nhận' },
     { key: 'completed', label: 'Đã hoàn thành' },
-    { key: 'deleted', label: 'Đã xóa' },
 ]
 
 // Định danh cột cho tab trang task
 export const taskColumns = [
     {
-        title: 'Mã task',
+        title: 'Mã nhiệm vụ',
         dataIndex: 'id',
         key: 'id',
     },
     {
-        title: 'Tên task',
+        title: 'Tên nhiệm vụ',
         dataIndex: 'title',
         key: 'title',
     },
-
+    // {
+    //     title: 'Mức độ ưu tiên',
+    //     dataIndex: 'priority',
+    //     key: 'priority',
+    //     render: priority => {
+    //         let backgroundColor = '#CC0000' //mặc định là Cao
+    //         if (priority === 'Trung bình')
+    //             backgroundColor = '#DACF71' // Trung bình
+    //         else if (priority === 'Thấp') backgroundColor = '#4DB134' // Thấp
+    //         return (
+    //             <Tag
+    //                 key={priority}
+    //                 style={{ backgroundColor, color: '#FFFFFF' }}>
+    //                 {priority}
+    //             </Tag>
+    //         )
+    //     },
+    // },
     {
-        title: 'Mức độ ưu tiên',
-        dataIndex: 'priority',
-        key: 'priority',
-        render: priority => {
-            let backgroundColor = '#CC0000' //mặc định là Cao
-            if (priority === 'Trung bình')
-                backgroundColor = '#DACF71' // Trung bình
-            else if (priority === 'Thấp') backgroundColor = '#4DB134' // Thấp
+        title: 'Tạo bởi',
+        dataIndex: 'created_by',
+        key: 'created_by',
+        render: current_status_id => {
+            let color = '#fff'
             return (
                 <Tag
-                    key={priority}
-                    style={{ backgroundColor, color: '#FFFFFF' }}>
-                    {priority}
+                    key={current_status_id}
+                    style={{ color, background: '#034752' }}>
+                    {current_status_id}
                 </Tag>
             )
         },
     },
+    { title: 'Ngày tạo', dataIndex: 'created_at', key: 'created_at' },
     {
         title: 'Trạng thái',
         dataIndex: 'current_status_id',
@@ -58,27 +72,21 @@ export const taskColumns = [
         },
     },
     {
-        title: 'Phân công',
-        dataIndex: 'assignee_id',
-        key: 'assignee_id',
-        render: assignee => {
-            let backgroundColor = 'rgb(31, 71, 214, 0.1)' //mặc định là cao
+        title: 'Phòng ban được giao',
+        dataIndex: 'department_id',
+        key: 'department_id',
+        render: current_status_id => {
+            let color = '#4B8BF4'
+            if (current_status_id === 'Phòng Kế Toán') color = '#F4A641'
+            else if (current_status_id === 'Phòng Marketing') color = '#34D399'
             return (
-                <Tag
-                    style={{
-                        backgrounColor: backgroundColor,
-                        color: '#c41d7f',
-                    }}>
-                    {assignee}
+                <Tag key={current_status_id} style={{ color }}>
+                    {current_status_id}
                 </Tag>
             )
         },
     },
-    {
-        title: 'Ngày hết hạn',
-        dataIndex: 'end_at',
-        key: 'end_at',
-    },
+
     {
         title: 'Tác vụ',
         key: 'actions',
