@@ -7,6 +7,7 @@ const {
 const { buildWhereClause } = require("../../../utils/searchUtils");
 const {
   validatedUserId,
+  validateRefDepartment,
 } = require("../../../middleware/validate/validateReferencer");
 const { format } = require("date-fns");
 const { createNotificationService } = require("./notification_service");
@@ -62,7 +63,6 @@ module.exports = {
         },
         department_id: task.department.department_name,
       };
-      delete formatTask.users_tasks_assignee_idTousers;
       delete formatTask.users_tasks_updated_byTousers;
       delete formatTask.users_tasks_created_byTousers;
       delete formatTask.task_status;
@@ -136,26 +136,13 @@ module.exports = {
   //   }
   //   return Tasks;
   // },
-  createTasksService: async (Tasks, userId, UserParentRole) => {
+  createTasksService: async (Tasks, userId) => {
     //Bước 1 check validate các trường tham chiếu ( khóa ngoiaj)
-    await validatedUserId(Tasks.assignee_id);
-
-    await checkRoleParent(UserParentRole, Tasks.assignee_id);
-
-    //check id assign
-    // ràng buộc ngày tạo task phải lớn hơn ngày hôm nay
-    const holderTaskEndAt = new Date(Tasks.end_at);
-    // Lấy ngày hiện tại từ server làm ngày tạo
-    const holderTaskCreateAt = new Date();
-
-    const formatHolderTaskCreateAt = format(holderTaskCreateAt, "yyyy-MM-dd");
-
-    //Ngày hết hạn của task phải lớn hơn ngày hiện tại
-    if (holderTaskEndAt <= holderTaskCreateAt) {
-      throw new BadRequestError(
-        `Ngày hết hạn của task phải lớn hơn ${formatHolderTaskCreateAt}`
-      );
-    }
+    const holderDepartment = await validateRefDepartment(Tasks.department_id);
+    // Lấy ra toàn bộ User trong department này
+    const departmentUsers = await prisma.users.findMany({
+      where: { department_id: Tasks.department_id },
+    });
 
     //B2 : tạo 1 bản ghi mặc định status của 1 task sẽ là chưa tiếp nhận
     const result = await prisma.$transaction(async (prisma) => {
@@ -177,10 +164,8 @@ module.exports = {
           title: Tasks.title,
           description: Tasks.description,
           department_id: Tasks.department_id,
-          //drop down tên nhân viên
-
           created_by: userId,
-          end_at: new Date(Tasks.end_at), // sử dụng ngày hết hạn được cung cấp
+
           current_status_id: initialStatus.id, // Thêm cột này để lưu trữ trạng thái hiện tại của task
           status: true,
         },
@@ -190,15 +175,18 @@ module.exports = {
     });
     //Sau khi tạo mới 1 task tạo thêm thông báo đi kèm
 
-    const notificationData = {
-      noti_type: "Task Assignment",
-      noti_content: `Bạn đã được thêm 1 nhiệm vụ mới: ${result.title}`,
-      noti_receive_id: result.assignee_id,
-      notification_status_id: 1, // Ví dụ status_id là 1 cho thông báo mới
-      noti_sender_id: result.created_by,
-    };
-    await createNotificationService(notificationData, result.created_by);
-
+    await Promise.all(
+      departmentUsers.map((member) => {
+        const notificationData = {
+          noti_type: "Task Assignment",
+          noti_content: `Một nhiệm vụ mới được thêm vào phòng: ${result.title}`,
+          noti_receive_id: member.id,
+          notification_status_id: 1,
+          noti_sender_id: result.created_by,
+        };
+        return createNotificationService(notificationData, result.created_by);
+      })
+    );
     return result;
   },
   receiveTaskService: async (Tasks, userId) => {

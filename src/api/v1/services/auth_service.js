@@ -40,7 +40,7 @@ module.exports = {
     return newUser;
   },
   LoginUserService: async (user) => {
-    const foundUser = await prisma.users.findFirst({
+    const foundUser = await prisma.users.findUnique({
       where: {
         email: user.email,
       },
@@ -58,14 +58,9 @@ module.exports = {
     if (!isValid) {
       throw new BadRequestError("Invalid password");
     }
-    const parent_role_id = foundUser.roles_users_role_idToroles.parent_role_id;
 
     // Giả sử bạn có hàm SignAccessToken và signRefreshToken để tạo các token
-    const accessToken = await SignAccessToken(
-      foundUser.id,
-      foundUser.role_id,
-      parent_role_id
-    );
+    const accessToken = await SignAccessToken(foundUser.id, foundUser.role_id);
 
     const refreshToken = await signRefreshToken(foundUser.id);
     const userName = foundUser.fullname;

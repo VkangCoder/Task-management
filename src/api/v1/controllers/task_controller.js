@@ -3,7 +3,6 @@ const {
   getAllTasksService,
   createTasksService,
   receiveTaskService,
-  getAllTasksServiceByUserId,
 } = require("../services/task_service.js");
 module.exports = {
   getAllTasksController: async (req, res, next) => {
@@ -21,11 +20,10 @@ module.exports = {
   },
   createTaskController: async (req, res, next) => {
     const UserId = req.payload.userId;
-    const UserParentRole = req.payload.parent_role_id;
 
     new CREATED({
       message: "Create  Tasks Succesful! : ",
-      metadata: await createTasksService(req.body, UserId, UserParentRole),
+      metadata: await createTasksService(req.body, UserId),
     }).send(res);
   },
   receiveTaskController: async (req, res, next) => {
