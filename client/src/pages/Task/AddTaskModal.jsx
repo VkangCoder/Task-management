@@ -10,6 +10,7 @@ import {
     Button,
 } from 'antd'
 import * as AuthService from '../../util/validate'
+import useFetchDepartmentId from '../../Hooks/useFetchDepartmentId'
 
 //Lấy các thành phần cụ thể từ các đối tượng và gán vào các biến mới
 const { TextArea } = Input
@@ -18,7 +19,7 @@ const { Title } = Typography
 
 function AddTaskModal({ modalTitle, isVisible, onClose, onTaskAdded }) {
     const [confirmLoading, setConfirmLoading] = useState(false)
-    const [getDepartmentId, setGetDepartmentId] = useState([])
+    // const [getDepartmentId, setGetDepartmentId] = useState([])
     const [getUserByDepartment, setGetUserByDepartment] = useState([])
     const [selectedDepartment, setSelectedDepartment] = useState(null)
 
@@ -72,42 +73,7 @@ function AddTaskModal({ modalTitle, isVisible, onClose, onTaskAdded }) {
         }
     }
     /* --------------------- Fetch Department ID ---------------------*/
-    useEffect(() => {
-        const fetchDepartments = async () => {
-            if (!AuthService.Authenticated()) {
-                console.error('User is not authenticated.')
-                return
-            }
-            try {
-                const token = localStorage.getItem('accessToken')
-                const response = await fetch(
-                    `https://task-management-be-ssq1.onrender.com/v1/departments/getAllListIdDepartments`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            Authorization: `${token}`,
-                        },
-                    }
-                )
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`)
-                }
-                const data = await response.json()
-                if (data && Array.isArray(data.metadata)) {
-                    setGetDepartmentId(data.metadata)
-                    console.log(data.metadata)
-                } else {
-                    console.error(
-                        'Expected an array of department, but received:',
-                        data
-                    )
-                }
-            } catch (error) {
-                console.error('Error fetching department:', error)
-            }
-        }
-        fetchDepartments()
-    }, [])
+    const getDepartmentId = useFetchDepartmentId()
 
     /* --------------------- Fetch Data user base on department ---------------------*/
     useEffect(() => {

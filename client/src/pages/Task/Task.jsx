@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Layout, Input, Table, Space, Button } from 'antd'
+// import { Layout, Input, Table, Space, Button } from 'antd'
+import { Layout, Table, Space, Button, Select } from 'antd'
 import HeaderComponent from '../../components/HeaderComponent'
 import './Task.css'
 import * as AuthService from '../../util/validate.js'
@@ -8,8 +9,10 @@ import { taskColumns } from '../../util/config.jsx'
 import Tab from '../../components/Tab.jsx'
 import AddTaskModal from './AddTaskModal.jsx'
 import DetailTaskModal from './DetailTaskModal.jsx'
+import useFetchDepartmentId from '../../Hooks/useFetchDepartmentId.jsx'
 
-const { Search } = Input
+// const { Search } = Input
+const { Option } = Select
 
 function Task() {
     const [taskData, setTaskData] = useState([])
@@ -25,6 +28,8 @@ function Task() {
     const [refreshData, setRefreshData] = useState(false)
     //task đã chọn
     const [selectedTask, setSelectedTask] = useState(null)
+    //Bộ lộc
+    const [departmentId, setDepartmentId] = useState(null)
     //Modal thêm
     const openModal = () => setModalVisible(true)
     const closeModal = () => setModalVisible(false)
@@ -32,7 +37,7 @@ function Task() {
     const openModalDetail = () => setIsDetailModal(true)
     const closeModalDetail = () => setIsDetailModal(false)
     //State Search
-    const [search, setSearch] = useState('')
+    // const [search, setSearch] = useState('')
 
     const pageLimit = 8
 
@@ -42,7 +47,10 @@ function Task() {
         openModalDetail()
     }
 
-    /* --------------------- Fetch Data và Fetch sau khi search ---------------------*/
+    /* --------------------- Fetch Department ID ---------------------*/
+    const getDepartmentId = useFetchDepartmentId()
+
+    /* --------------------- Fetch Data  ---------------------*/
     useEffect(() => {
         const fetchData = async () => {
             if (!AuthService.Authenticated()) {
@@ -55,29 +63,24 @@ function Task() {
                 const baseUrl =
                     'https://task-management-be-ssq1.onrender.com/v1/tasks/getAllTasks'
                 let url = `${baseUrl}?page=${page}&limit=${pageLimit}`
-                if (search) {
-                    url += `&filterField=title&operator=contains&value=${search}`
+
+                if (departmentId) {
+                    url += `&filterField=department_id&operator==&value=${departmentId}`
                 }
 
-                const response = await fetch(
-                    url,
-                    // `https://task-management-be-ssq1.onrender.com/v1/tasks/getAllTasks?page=${page}&limit=${pageLimit}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            Authorization: `${token}`,
-                        },
-                    }
-                )
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `${token}`,
+                    },
+                })
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`)
                 }
                 const data = await response.json()
                 if (data && Array.isArray(data.metadata)) {
                     setTaskData(data.metadata)
-                    // Lọc dữ liệu sau khi fetch và kích hoạt view  current_status_id
-                    filterTasks(data.metadata, activeView)
-                    console.log(data.metadata)
+                    // filterTasks(data.metadata, activeView)
                 } else {
                     console.error(
                         'Expected an array of Task, but received:',
@@ -90,7 +93,8 @@ function Task() {
         }
 
         fetchData()
-    }, [page, activeView, refreshData, search])
+        // }, [page, activeView, refreshData, search, filterValues])
+    }, [page, refreshData, departmentId])
 
     // Bộ lộc current_status_id
     const filterTasks = (tasks, view) => {
@@ -131,15 +135,16 @@ function Task() {
                 onClick={openModal}
             />
             <Layout style={{ padding: '0 50px 0 50px' }}>
-                <Search
-                    placeholder="Tìm kiếm tên nhiệm vụ"
-                    onSearch={value => setSearch(value)}
-                    style={{
-                        marginBottom: 16,
-                        width: '100%',
-                    }}
-                    enterButton
-                />
+                <Select
+                    defaultValue="Chọn phòng ban"
+                    style={{ width: 200, marginBottom: 16 }}
+                    onChange={value => setDepartmentId(value)}>
+                    {getDepartmentId.map(department => (
+                        <Option key={department.id} value={department.id}>
+                            {department.department_name}
+                        </Option>
+                    ))}
+                </Select>
                 <Table
                     columns={taskColumns.map(col => {
                         if (col.key === 'actions') {

@@ -54,7 +54,11 @@ export const taskColumns = [
             )
         },
     },
-    { title: 'Ngày tạo', dataIndex: 'created_at', key: 'created_at' },
+    {
+        title: 'Ngày tạo',
+        dataIndex: 'created_at',
+        key: 'created_at',
+    },
     {
         title: 'Trạng thái',
         dataIndex: 'current_status_id',
@@ -116,3 +120,4 @@ export const taskColumns = [
         ),
     },
 ]
+// filter
