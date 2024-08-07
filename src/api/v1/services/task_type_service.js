@@ -18,7 +18,7 @@ const TaskStatusCodes = {
 };
 
 module.exports = {
-  getAllTasksService: async (queryParams) => {
+  getAllTask_TypeService: async (queryParams) => {
     const { filterField, operator, value, page, limit } = queryParams;
 
     // Fetch all with pagination
@@ -29,55 +29,47 @@ module.exports = {
     //sort DESC
     const orderBy = { created_at: "desc" }; // Thay 'desc' bằng 'asc' nếu bạn muốn sắp xếp tăng dần
 
-    let Tasks = await prisma.tasks.findMany({
+    let Task_Type = await prisma.task_types.findMany({
       skip: skip,
       take: pageSize,
       where,
       orderBy,
       include: {
-        users_tasks_updated_byTousers: true,
-        users_tasks_created_byTousers: true,
-        task_status: true,
         department: true,
-        task_types: true,
+        users_task_types_created_byTousers: true,
+        users_task_types_updated_byTousers: true,
       },
     });
-    Tasks = Tasks.map((task) => {
+    Task_Type = Task_Type.map((task_type) => {
       const formatTask = {
-        ...task,
-        created_at: format(new Date(task.created_at), "yyyy-MM-dd "),
-        updated_at: task.updated_at
-          ? format(new Date(task.updated_at), "yyyy-MM-dd")
+        ...task_type,
+        created_at: format(new Date(task_type.created_at), "yyyy-MM-dd "),
+        updated_at: task_type.updated_at
+          ? format(new Date(task_type.updated_at), "yyyy-MM-dd")
           : "Not yet updated",
 
-        created_by: task.users_tasks_created_byTousers.fullname,
-        updated_by: task.users_tasks_updated_byTousers
-          ? task.users_tasks_updated_byTousers.fullname
+        created_by: task_type.users_task_types_created_byTousers.fullname,
+        updated_by: task_type.users_task_types_updated_byTousers
+          ? task_type.users_task_types_updated_byTousers.fullname
           : "Not yet updated",
 
         //current_status cần phải update theo thời gian thực
-        current_status_id: task.task_status.status_name,
-        status_change: {
-          old_value: task.task_status.old_value, // Cần có cơ chế để truy xuất giá trị này
-          new_value: task.task_status.new_value, // Cần có cơ chế để truy xuất giá trị này
-          received_by: task.task_status.updated_by,
-        },
-        department_id: task.department.department_name,
-        task_types_id: task.task_types.type_name,
+
+        department_id: task_type.department.department_name,
       };
-      delete formatTask.users_tasks_updated_byTousers;
-      delete formatTask.users_tasks_created_byTousers;
-      delete formatTask.task_status;
+      delete formatTask.users_task_types_updated_byTousers;
+      delete formatTask.users_task_types_created_byTousers;
+
       delete formatTask.department;
-      delete formatTask.task_types;
+
       return formatTask;
     });
-    if (Tasks.length === 0) {
+    if (Task_Type.length === 0) {
       return [];
     }
-    return Tasks;
+    return Task_Type;
   },
-  // getAllTasksServiceByUserId: async (queryParams, UserId) => {
+  // getAllTask_TypeServiceByUserId: async (queryParams, UserId) => {
   //   const { filterField, operator, value, page, limit, sortBy, sortOrder } =
   //     queryParams;
 
@@ -92,7 +84,7 @@ module.exports = {
   //   if (UserId) {
   //     where.assignee_id = parseInt(UserId);
   //   }
-  //   let Tasks = await prisma.tasks.findMany({
+  //   let Task_Type = await prisma.tasks.findMany({
   //     skip: skip,
   //     take: pageSize,
   //     where,
@@ -104,7 +96,7 @@ module.exports = {
   //       task_status: true,
   //     },
   //   });
-  //   Tasks = Tasks.map((task) => {
+  //   Task_Type = Task_Type.map((task) => {
   //     const formatTask = {
   //       ...task,
   //       created_at: format(new Date(task.created_at), "yyyy-MM-dd "),
@@ -133,72 +125,38 @@ module.exports = {
 
   //     return formatTask;
   //   });
-  //   if (Tasks.length === 0) {
+  //   if (Task_Type.length === 0) {
   //     return [];
   //   }
-  //   return Tasks;
+  //   return Task_Type;
   // },
-  createTasksService: async (Tasks, userId) => {
+  createTask_TypeService: async (TaskTypeData, userId) => {
     //Bước 1 check validate các trường tham chiếu ( khóa ngoiaj)
-    console.log(Tasks.task_types_id);
-    const holderDepartment = await validateRefDepartment(Tasks.department_id);
-    await validateRefDepartment(Tasks.task_types_id);
-    // Lấy ra toàn bộ User trong department này
-    const departmentUsers = await prisma.users.findMany({
-      where: { department_id: Tasks.department_id },
-    });
-
-    //B2 : tạo 1 bản ghi mặc định status của 1 task sẽ là chưa tiếp nhận
-    const result = await prisma.$transaction(async (prisma) => {
-      const initialStatus = await prisma.task_status.create({
-        data: {
-          task_id: null, // Sẽ cập nhật sau khi task được tạo
-          old_value: "Chưa tiếp nhận", // Giả định không có trạng thái trước đó
-          new_value: "Chưa tiếp nhận",
-          updated_by: userId,
-          updated_time: new Date(),
-          status: true,
-          status_name: "Chưa tiếp nhận",
-        },
-      });
-      //
-      //Bước 3 : tạo task với current_status vừa đc tạo nên
-      const newTasks = await prisma.tasks.create({
-        data: {
-          title: Tasks.title,
-          description: Tasks.description,
-          department_id: Tasks.department_id,
-          task_types_id: Tasks.task_types_id,
-          created_by: userId,
-          current_status_id: initialStatus.id, // Thêm cột này để lưu trữ trạng thái hiện tại của task
-
-          status: true,
-        },
-      });
-
-      return newTasks;
-    });
-    //Sau khi tạo mới 1 task tạo thêm thông báo đi kèm
-
-    await Promise.all(
-      departmentUsers.map((member) => {
-        const notificationData = {
-          noti_type: "Task Assignment",
-          noti_content: `Một nhiệm vụ mới được thêm vào phòng: ${result.title}`,
-          noti_receive_id: member.id,
-          notification_status_id: 1,
-          noti_sender_id: result.created_by,
-        };
-        return createNotificationService(notificationData, result.created_by);
-      })
+    const holderDepartment = await validateRefDepartment(
+      TaskTypeData.department_id
     );
-    return result;
+
+    const newTask_Type = await prisma.$transaction(async (prisma) => {
+      const taskType = await prisma.task_types.create({
+        data: {
+          type_name: TaskTypeData.type_name,
+          department_id: TaskTypeData.department_id,
+          created_by: userId,
+          status: true,
+        },
+      });
+      // Đoạn mã tạo thông báo đi kèm
+      // Ví dụ: await prisma.notifications.create({...})
+
+      return taskType;
+    });
+    return newTask_Type;
   },
-  receiveTaskService: async (Tasks, userId) => {
+  receiveTaskService: async (Task_Type, userId) => {
     const result = await prisma.$transaction(async (prisma) => {
       //bước 1 tìm task cần nhận
       const task = await prisma.tasks.findUnique({
-        where: { id: Tasks.id },
+        where: { id: Task_Type.id },
         include: { task_status: true },
       });
       if (!task) {
@@ -206,7 +164,7 @@ module.exports = {
       }
       // biến đổi các enum 2 thành Đã tiếp nhận , 3 thành Đã hoàn thành
       let newStatus;
-      switch (Tasks.new_value) {
+      switch (Task_Type.new_value) {
         case 2:
           newStatus = "Đã tiếp nhận";
           break;
@@ -221,10 +179,10 @@ module.exports = {
       const oldStatus = task.task_status
         ? task.task_status.new_value
         : "Chưa tiếp nhận";
-      if (oldStatus === Tasks.new_value) {
+      if (oldStatus === Task_Type.new_value) {
         throw new BadRequestError(
           "Không cập nhật được trạng thái  `" +
-            Tasks.new_value +
+            Task_Type.new_value +
             "` vì nó trùng với trạng thái cũ của task "
         );
       }
@@ -237,7 +195,7 @@ module.exports = {
       //bước 3 tạo bản ghi để theo dõi sự cập nhật trạng thái của task đó
       const statusChange = await prisma.task_status.create({
         data: {
-          task_id: Tasks.id,
+          task_id: Task_Type.id,
           old_value: oldStatus,
           new_value: newStatus,
           updated_by: userId,
@@ -257,7 +215,7 @@ module.exports = {
           statusChange.new_value +
           "`",
         noti_receive_id: task.created_by,
-        notification_status_id: Tasks.notification_status_id, // Giả sử status_id là 1 cho trạng thái đã tiếp nhận
+        notification_status_id: Task_Type.notification_status_id, // Giả sử status_id là 1 cho trạng thái đã tiếp nhận
         noti_sender_id: userId,
       };
       const notification = await createNotificationService(
@@ -267,7 +225,7 @@ module.exports = {
       //
       //bước 5: update current_task_id của Task đó thành mới nhất
       const updateTask = await prisma.tasks.update({
-        where: { id: Tasks.id },
+        where: { id: Task_Type.id },
         data: {
           current_status_id: statusChange.id,
 

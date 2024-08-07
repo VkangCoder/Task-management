@@ -73,4 +73,15 @@ module.exports = {
       throw new NotFoundError("Id Department không tồn tại ");
     }
   },
+  validateRefDepartment: async (id) => {
+    const isExistTaskType = await prisma.task_types.findUnique({
+      where: { id: id },
+      select: {
+        id: true,
+      },
+    });
+    if (!isExistTaskType) {
+      throw new NotFoundError("Id Department không tồn tại ");
+    }
+  },
 };

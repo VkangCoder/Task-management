@@ -23,15 +23,16 @@ model comments {
 }
 
 model department {
-  id                                    Int       @id @default(autoincrement())
-  department_name                       String?   @db.VarChar(50)
+  id                                    Int          @id @default(autoincrement())
+  department_name                       String?      @db.VarChar(50)
   created_by                            Int?
-  created_at                            DateTime? @default(now()) @db.Timestamp(6)
+  created_at                            DateTime?    @default(now()) @db.Timestamp(6)
   manager_id                            Int?
-  users_department_created_byTousers    users?    @relation("department_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_department_manager_idTousers    users?    @relation("department_manager_idTousers", fields: [manager_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_manager")
+  users_department_created_byTousers    users?       @relation("department_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_department_manager_idTousers    users?       @relation("department_manager_idTousers", fields: [manager_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_manager")
+  task_types                            task_types[]
   tasks                                 tasks[]
-  users_users_department_idTodepartment users[]   @relation("users_department_idTodepartment")
+  users_users_department_idTodepartment users[]      @relation("users_department_idTodepartment")
 }
 
 model franchise {
@@ -115,8 +116,10 @@ model tasks {
   current_status_id             Int
   status                        Boolean
   department_id                 Int?
+  task_types_id                 Int
   comments                      comments[]
   department                    department? @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_department")
+  task_types                    task_types  @relation(fields: [task_types_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tasks_type")
   users_tasks_created_byTousers users       @relation("tasks_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   task_status                   task_status @relation(fields: [current_status_id], references: [id])
   users_tasks_updated_byTousers users?      @relation("tasks_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -156,6 +159,8 @@ model users {
   roles_roles_created_byTousers                       roles[]            @relation("roles_created_byTousers")
   roles_roles_updated_byTousers                       roles[]            @relation("roles_updated_byTousers")
   task_status                                         task_status[]
+  task_types_task_types_created_byTousers             task_types[]       @relation("task_types_created_byTousers")
+  task_types_task_types_updated_byTousers             task_types[]       @relation("task_types_updated_byTousers")
   tasks_tasks_created_byTousers                       tasks[]            @relation("tasks_created_byTousers")
   tasks_tasks_updated_byTousers                       tasks[]            @relation("tasks_updated_byTousers")
   department_users_department_idTodepartment          department?        @relation("users_department_idTodepartment", fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_department")
@@ -184,4 +189,19 @@ model notification_status {
   status_name  String?        @db.VarChar(30)
   created_at   DateTime?      @default(now()) @db.Timestamp(6)
   notification notification[]
+}
+
+model task_types {
+  id                                 Int         @id @default(autoincrement())
+  type_name                          String?     @db.VarChar(50)
+  department_id                      Int?
+  status                             Boolean?
+  created_by                         Int?
+  created_at                         DateTime?   @default(now()) @db.Timestamp(6)
+  updated_by                         Int?
+  updated_at                         DateTime?   @default(now()) @db.Timestamp(6)
+  department                         department? @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_departmenttype")
+  users_task_types_created_byTousers users?      @relation("task_types_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user")
+  users_task_types_updated_byTousers users?      @relation("task_types_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user_update")
+  tasks                              tasks[]
 }
