@@ -55,6 +55,7 @@ module.exports = {
         notification_status_id: noti.notification_status.status_name,
         noti_receive_id:
           noti.users_notification_noti_receive_idTousers.fullname,
+        
       };
       delete formatNoti.users_notification_noti_receive_idTousers;
       delete formatNoti.users_notification_noti_sender_idTousers;

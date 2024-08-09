@@ -68,6 +68,9 @@ module.exports = {
           received_by: task.task_status.updated_by
             ? task.task_status.users.fullname
             : null,
+          received_time: task.task_status.updated_by
+            ? format(new Date(task.task_status.updated_time), "yyyy-MM-dd")
+            : null,
         },
         department_id: task.department.department_name,
         task_types_id: task.task_types.type_name,
@@ -77,7 +80,7 @@ module.exports = {
       delete formatTask.task_status;
       delete formatTask.department;
       delete formatTask.task_types;
-      
+
       return formatTask;
     });
     if (Tasks.length === 0) {
@@ -261,12 +264,8 @@ module.exports = {
       //bước 4: tạo thông báo đính kèm khi tiếp nhận hoặc trả task
       const notificationData = {
         noti_type: "Task Assignment",
-        noti_content:
-          "Người tiếp nhận đã cập nhật trạng thái của task `" +
-          task.title +
-          "` thành `" +
-          statusChange.new_value +
-          "`",
+        noti_content: `${userId}đã tiếp nhận task của bạn`,
+
         noti_receive_id: task.created_by,
         notification_status_id: Tasks.notification_status_id, // Giả sử status_id là 1 cho trạng thái đã tiếp nhận
         noti_sender_id: userId,
@@ -282,7 +281,6 @@ module.exports = {
         data: {
           current_status_id: statusChange.id,
 
-          updated_by: userId,
           // Cập nhật với ID của bản ghi trạng thái mới nhất
         },
       });
