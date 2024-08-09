@@ -62,16 +62,7 @@ module.exports = {
 
         //current_status cần phải update theo thời gian thực
         current_status_id: task.task_status.status_name,
-        status_change: {
-          old_value: task.task_status.old_value, // Cần có cơ chế để truy xuất giá trị này
-          new_value: task.task_status.new_value, // Cần có cơ chế để truy xuất giá trị này
-          received_by: task.task_status.updated_by
-            ? task.task_status.users.fullname
-            : null,
-          received_time: task.task_status.updated_by
-            ? format(new Date(task.task_status.updated_time), "yyyy-MM-dd")
-            : null,
-        },
+        status_change: task.task_status,
         department_id: task.department.department_name,
         task_types_id: task.task_types.type_name,
       };
