@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
-import { Modal, Typography, Descriptions, Tag } from 'antd'
+import { Modal, Typography, Descriptions, Tag, Spin } from 'antd'
+import TimeLineCustom from '../../components/TimeLineCustom'
 const { Title } = Typography
 
 const TagAssigneeCustom = ({ department_id }) => {
@@ -29,12 +30,28 @@ const TagCustom = ({ props }) => {
     )
 }
 
+const TagPersonHandle = ({ props }) => {
+    let style = {
+        fontSize: '14px',
+        backgroundColor: '#034752', // Mặc định là màu xanh dương đậm
+        color: '#fff',
+    }
+
+    if (!props) {
+        style.backgroundColor = '#CC0000' // Đỏ cho trạng thái 'Chưa tiếp nhận'
+        style.color = '#fff'
+        props = <strong>Chưa tiếp nhận</strong>
+    }
+
+    return <Tag style={style}>{props}</Tag>
+}
+
 const TagCurrentStatusCustom = ({ currentStatusId }) => {
     let color = '#CC0000' //mặc định là  Chưa tiếp nhận
     if (currentStatusId === 'Đã tiếp nhận') color = '#1F47D6' // Đã tiếp nhận
     else if (currentStatusId === 'Đã hoàn thành') color = '#348E1D' // Đã hoàn thành
     return (
-        <span key={currentStatusId} style={{ color }}>
+        <span key={currentStatusId} style={{ color, marginLeft: '10px' }}>
             {currentStatusId}
         </span>
     )
@@ -59,29 +76,6 @@ const StyledDescription = ({ children }) => {
 }
 
 function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
-    // const [user, setUser] = useState()
-
-    // const fetchUser = async () => {
-    //     if(!AuthService.Authenticated()) {
-    //         console.error('User is not authenticated.')
-    //             return
-    //     }
-    //     try {
-    //         const token = localStorage.getItem('accessToken')
-    //         const response = await fetch(
-    //             `https://task-management-be-ssq1.onrender.com/v1/users/getAllUsers?filterField=id&operator==&value=${selectedDepartment}`,
-    //             {
-    //                 method: 'GET',
-    //                 headers: {
-    //                     Authorization: `${token}`,
-    //                 },
-    //             }
-    //         )
-    //     } catch (err) {
-
-    //     }
-    // }
-
     const items = task
         ? [
               { label: 'Mã nhiệm vụ', content: task.id },
@@ -97,10 +91,14 @@ function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
                   ),
               },
               {
+                  label: 'Người tạo',
+                  content: <TagCustom props={task.created_by} />,
+              },
+              {
                   label: 'Mô tả',
                   content: (
                       <StyledDescription>
-                          <i>{task.description}</i>
+                          <p style={{ fontSize: '16px' }}>{task.description}</p>
                       </StyledDescription>
                   ),
               },
@@ -113,37 +111,17 @@ function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
                   ),
               },
               {
-                  label: 'Người tạo',
-                  content: <TagCustom props={task.created_by} />,
-              },
-              { label: 'Ngày tạo', content: <b>{task.created_at}</b> },
-              {
-                  label: 'Trạng thái',
-                  content: (
-                      <ul style={{ paddingLeft: 10 }}>
-                          {task.status_change?.received_by ? (
-                              <>
-                                  <li>
-                                      <b>Tiếp nhận bởi: </b>
-                                      <TagCustom
-                                          props={
-                                              task.status_change?.received_by
-                                          }
-                                      />
-                                  </li>
-                                  <li>
-                                      <b>Tiếp nhận lúc: </b>
-                                      {task.status_change?.received_time}
-                                  </li>
-                              </>
-                          ) : (
-                              <li>
-                                  <b>Trạng thái: </b>
-                                  {'Chưa tiếp nhận'}
-                              </li>
-                          )}
-                      </ul>
-                  ),
+                  label: 'Lịch sử trạng thái',
+                  //   content: <TimeLineCustom taskStatus={task.id} />,
+                  content:
+                      task.current_status_id === 'Chưa tiếp nhận' ? (
+                          <div>
+                              <Spin />
+                              <TagCurrentStatusCustom currentStatusId="Đang đợi tiếp nhận" />
+                          </div>
+                      ) : (
+                          <TimeLineCustom taskStatus={task.id} />
+                      ),
               },
           ]
         : []

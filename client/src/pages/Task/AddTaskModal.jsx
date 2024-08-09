@@ -66,6 +66,7 @@ function AddTaskModal({ modalTitle, isVisible, onClose, onTaskAdded }) {
     /* --------------------- Fetch Department ID ---------------------*/
     const getDepartmentId = useFetchDepartmentId()
     const getTaskTypesId = useFetchTaskTypes(selectedDepartment, isVisible)
+
     return (
         <>
             <Modal

@@ -7,7 +7,7 @@ import {
     UserOutlined,
     LockOutlined,
 } from '@ant-design/icons'
-import { Button, Checkbox, Form, Input, Typography, Alert } from 'antd'
+import { Button, Checkbox, Form, Input, Typography, notification } from 'antd'
 const { Title } = Typography
 import * as AuthService from '../../util/validate.js'
 
@@ -15,6 +15,7 @@ function LoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loginSuccess, setLoginSuccess] = useState(false)
+    const [api, contextHolder] = notification.useNotification()
     const showPassword = false
 
     const navigate = useNavigate()
@@ -38,14 +39,32 @@ function LoginPage() {
     }, [loginSuccess, navigate])
 
     const handleLogin = async () => {
-        const success = await AuthService.login(email, password)
-        if (success) {
+        const result = await AuthService.login(email, password)
+        if (result.success) {
+            openNotificationWithIcon('success')
             setLoginSuccess(true)
+        } else {
+            openNotificationWithIcon('error') // Giả sử sử dụng 'error' khi đăng nhập thất bại
         }
+    }
+
+    const openNotificationWithIcon = type => {
+        api[type]({
+            message:
+                type === 'success'
+                    ? 'Đăng Nhập Thành Công'
+                    : 'Đăng Nhập Thất Bại',
+            description:
+                type === 'success'
+                    ? 'Bạn sẽ được chuyển đến trang quản trị trong vài giây.'
+                    : 'Vui lòng thử lại.',
+            duration: 2.5,
+        })
     }
 
     return (
         <main className="login-page">
+            {contextHolder}
             {/* ------------ Header  ------------*/}
             <div className="header">
                 <img src={TaskFlowLogo} alt="Logo" className="logo" />
@@ -122,13 +141,6 @@ function LoginPage() {
                             visible ? <EyeFilled /> : <EyeInvisibleFilled />
                         }
                     />
-                    {loginSuccess && (
-                        <Alert
-                            style={{ marginTop: 10 }}
-                            message="Đăng Nhập Thành Công"
-                            type="success"
-                        />
-                    )}
                 </Form.Item>
                 <Form.Item>
                     <Form.Item name="remember" valuePropName="checked" noStyle>
