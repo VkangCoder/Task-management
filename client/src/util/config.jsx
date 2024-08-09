@@ -40,7 +40,7 @@ export const taskColumns = [
     //     },
     // },
     {
-        title: 'Tạo bởi',
+        title: 'Người tạo',
         dataIndex: 'created_by',
         key: 'created_by',
         render: current_status_id => {
@@ -50,6 +50,18 @@ export const taskColumns = [
                     key={current_status_id}
                     style={{ color, background: '#034752' }}>
                     {current_status_id}
+                </Tag>
+            )
+        },
+    },
+    {
+        title: 'Loại công việc',
+        dataIndex: 'task_types_id',
+        key: 'task_types_id',
+        render: task_types_id => {
+            return (
+                <Tag key={task_types_id} color="magenta">
+                    {task_types_id}
                 </Tag>
             )
         },

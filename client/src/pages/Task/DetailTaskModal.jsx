@@ -20,6 +20,7 @@ const TagCustom = ({ props }) => {
     return (
         <Tag
             style={{
+                fontSize: '14px',
                 backgroundColor: backgroundColor,
                 color: '#fff',
             }}>
@@ -83,8 +84,18 @@ function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
 
     const items = task
         ? [
-              { label: 'Mã task', content: task.id },
-              { label: 'Tên task', content: task.title },
+              { label: 'Mã nhiệm vụ', content: task.id },
+              { label: 'Tên nhiệm vụ', content: task.title },
+              {
+                  label: 'Loại nhiệm vụ',
+                  content: <Tag color="magenta">{task.task_types_id}</Tag>,
+              },
+              {
+                  label: 'Phòng phân công',
+                  content: (
+                      <TagAssigneeCustom department_id={task.department_id} />
+                  ),
+              },
               {
                   label: 'Mô tả',
                   content: (
@@ -94,13 +105,6 @@ function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
                   ),
               },
               {
-                  label: 'Phòng phân công',
-                  content: (
-                      <TagAssigneeCustom department_id={task.department_id} />
-                  ),
-              },
-
-              {
                   label: 'Trạng thái',
                   content: (
                       <TagCurrentStatusCustom
@@ -108,33 +112,36 @@ function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
                       />
                   ),
               },
-              { label: 'Ngày tạo', content: <b>{task.created_at}</b> },
               {
                   label: 'Người tạo',
                   content: <TagCustom props={task.created_by} />,
               },
-              {
-                  label: 'Người cập nhật',
-                  content: <TagCustom props={task.updated_by} />,
-              },
-              { label: 'Ngày cập nhật', content: task.updated_at },
-
+              { label: 'Ngày tạo', content: <b>{task.created_at}</b> },
               {
                   label: 'Trạng thái',
                   content: (
                       <ul style={{ paddingLeft: 10 }}>
-                          <li>
-                              <b>Trạng thái cũ: </b>
-                              {task.status_change?.old_value}
-                          </li>
-                          <li>
-                              <b>Trạng thái mới: </b>
-                              {task.status_change?.new_value}
-                          </li>
-                          <li>
-                              <b>Thay đổi bởi: </b>
-                              {task.status_change?.updated_by}
-                          </li>
+                          {task.status_change?.received_by ? (
+                              <>
+                                  <li>
+                                      <b>Tiếp nhận bởi: </b>
+                                      <TagCustom
+                                          props={
+                                              task.status_change?.received_by
+                                          }
+                                      />
+                                  </li>
+                                  <li>
+                                      <b>Tiếp nhận lúc: </b>
+                                      {task.status_change?.received_time}
+                                  </li>
+                              </>
+                          ) : (
+                              <li>
+                                  <b>Trạng thái: </b>
+                                  {'Chưa tiếp nhận'}
+                              </li>
+                          )}
                       </ul>
                   ),
               },

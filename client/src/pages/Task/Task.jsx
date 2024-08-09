@@ -80,7 +80,6 @@ function Task() {
                 const data = await response.json()
                 if (data && Array.isArray(data.metadata)) {
                     setTaskData(data.metadata)
-                    // filterTasks(data.metadata, activeView)
                 } else {
                     console.error(
                         'Expected an array of Task, but received:',
@@ -135,16 +134,19 @@ function Task() {
                 onClick={openModal}
             />
             <Layout style={{ padding: '0 50px 0 50px' }}>
-                <Select
-                    defaultValue="Chọn phòng ban"
-                    style={{ width: 200, marginBottom: 16 }}
-                    onChange={value => setDepartmentId(value)}>
-                    {getDepartmentId.map(department => (
-                        <Option key={department.id} value={department.id}>
-                            {department.department_name}
-                        </Option>
-                    ))}
-                </Select>
+                <div style={{ display: 'flex' }}>
+                    <p>đwd</p>
+                    <Select
+                        defaultValue="Chọn phòng ban"
+                        style={{ width: 200, marginBottom: 16 }}
+                        onChange={value => setDepartmentId(value)}>
+                        {getDepartmentId.map(department => (
+                            <Option key={department.id} value={department.id}>
+                                {department.department_name}
+                            </Option>
+                        ))}
+                    </Select>
+                </div>
                 <Table
                     columns={taskColumns.map(col => {
                         if (col.key === 'actions') {

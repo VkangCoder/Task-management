@@ -1,16 +1,8 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from 'react'
-import {
-    Modal,
-    Input,
-    Select,
-    DatePicker,
-    Form,
-    Typography,
-    Button,
-} from 'antd'
-import * as AuthService from '../../util/validate'
+import { useState } from 'react'
+import { Modal, Input, Select, Form, Typography, Button } from 'antd'
 import useFetchDepartmentId from '../../Hooks/useFetchDepartmentId'
+import useFetchTaskTypes from '../../Hooks/useFetchTaskTypes'
 
 //Lấy các thành phần cụ thể từ các đối tượng và gán vào các biến mới
 const { TextArea } = Input
@@ -19,9 +11,8 @@ const { Title } = Typography
 
 function AddTaskModal({ modalTitle, isVisible, onClose, onTaskAdded }) {
     const [confirmLoading, setConfirmLoading] = useState(false)
-    // const [getDepartmentId, setGetDepartmentId] = useState([])
-    const [getUserByDepartment, setGetUserByDepartment] = useState([])
     const [selectedDepartment, setSelectedDepartment] = useState(null)
+    const [selectedTaskTypes, setSelectedTaskTypes] = useState(null)
 
     const [form] = Form.useForm()
 
@@ -31,10 +22,10 @@ function AddTaskModal({ modalTitle, isVisible, onClose, onTaskAdded }) {
         const payload = {
             title: values.title,
             description: values.description,
-            assignee_id: values.assignee_id,
-            priority: values.priority,
-            end_at: values.end_at ? values.end_at.format('YYYY-MM-DD') : null,
+            department_id: selectedDepartment,
+            task_types_id: selectedTaskTypes,
         }
+
         console.log('sending payload: ', payload)
         try {
             const token = localStorage.getItem('accessToken')
@@ -74,49 +65,7 @@ function AddTaskModal({ modalTitle, isVisible, onClose, onTaskAdded }) {
     }
     /* --------------------- Fetch Department ID ---------------------*/
     const getDepartmentId = useFetchDepartmentId()
-
-    /* --------------------- Fetch Data user base on department ---------------------*/
-    useEffect(() => {
-        if (!selectedDepartment) return
-
-        const fetchUsersByDepartment = async () => {
-            if (!AuthService.Authenticated()) {
-                console.error('User is not authenticated.')
-                return
-            }
-            try {
-                const token = localStorage.getItem('accessToken')
-                const response = await fetch(
-                    `https://task-management-be-ssq1.onrender.com/v1/users/getAllUsersByDepartmentId?filterField=department_id&operator==&value=${selectedDepartment}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            Authorization: `${token}`,
-                        },
-                    }
-                )
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`)
-                }
-                const data = await response.json()
-                if (data && Array.isArray(data.metadata)) {
-                    setGetUserByDepartment(data.metadata)
-                    console.log(data.metadata)
-                } else {
-                    setGetUserByDepartment([])
-                    console.error(
-                        'Expected an array of products, but received:',
-                        data
-                    )
-                }
-            } catch (error) {
-                console.error('Error fetching User:', error)
-            }
-        }
-        setGetUserByDepartment([])
-        fetchUsersByDepartment()
-    }, [selectedDepartment])
-
+    const getTaskTypesId = useFetchTaskTypes(selectedDepartment, isVisible)
     return (
         <>
             <Modal
@@ -182,53 +131,22 @@ function AddTaskModal({ modalTitle, isVisible, onClose, onTaskAdded }) {
                     </Form.Item>
                     <Form.Item
                         name="assignee_id"
-                        label="Người được giao"
+                        label="Loại công việc"
                         required
                         rules={[
                             {
                                 required: true,
-                                message: 'Vui chọn người được giao',
+                                message: 'Vui lòng chọn loại công việc',
                             },
                         ]}>
                         <Select
-                            placeholder="Chọn người được giao"
-                            disabled={!selectedDepartment}>
-                            {getUserByDepartment.map(user => (
-                                <Option key={user.id} value={user.id}>
-                                    {user.fullname}
+                            placeholder="Chọn loại công việc"
+                            onChange={value => setSelectedTaskTypes(value)}>
+                            {getTaskTypesId.map(taskType => (
+                                <Option key={taskType.id} value={taskType.id}>
+                                    {taskType.type_name}
                                 </Option>
                             ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item
-                        name="end_at"
-                        label="Ngày hết hạn"
-                        required
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Vui lòng chọn ngày hết hạn',
-                            },
-                        ]}>
-                        <DatePicker
-                            style={{ width: '100%' }}
-                            placeholder="Chọn ngày hết hạn"
-                            format="YYYY-MM-DD"
-                        />
-                    </Form.Item>
-                    <Form.Item
-                        label="Mức Độ Ưu Tiên"
-                        name="priority"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Vui lòng chọn mức độ ưu tiên',
-                            },
-                        ]}>
-                        <Select placeholder="Mức Độ Ưu Tiên">
-                            <Option value="Thấp" />
-                            <Option value="Trung bình" />
-                            <Option value="Cao" />
                         </Select>
                     </Form.Item>
                     <Form.Item
