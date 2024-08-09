@@ -38,11 +38,7 @@ module.exports = {
       include: {
         users_tasks_updated_byTousers: true,
         users_tasks_created_byTousers: true,
-        task_status: {
-          include: {
-            users: true,
-          },
-        },
+
         department: true,
         task_types: true,
       },
@@ -62,13 +58,13 @@ module.exports = {
 
         //current_status cần phải update theo thời gian thực
         current_status_id: task.task_status.status_name,
-        status_change: task.task_status,
+
         department_id: task.department.department_name,
         task_types_id: task.task_types.type_name,
       };
       delete formatTask.users_tasks_updated_byTousers;
       delete formatTask.users_tasks_created_byTousers;
-      delete formatTask.task_status;
+
       delete formatTask.department;
       delete formatTask.task_types;
 

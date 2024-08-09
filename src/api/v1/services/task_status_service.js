@@ -44,7 +44,7 @@ module.exports = {
         key: taskStatus.id.toString(),
         time: format(new Date(taskStatus.updated_time), "yyyy-MM-dd HH:mm:ss"),
         title: `${taskStatus.old_value} → ${taskStatus.new_value}`,
-
+        handler: `${taskStatus.users.fullname}`,
         status: taskStatus.new_value,
       };
     });
