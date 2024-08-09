@@ -155,7 +155,7 @@ module.exports = {
           task_id: null, // Sẽ cập nhật sau khi task được tạo
           old_value: "Chưa tiếp nhận", // Giả định không có trạng thái trước đó
           new_value: "Chưa tiếp nhận",
-          updated_by: userId,
+
           updated_time: new Date(),
           status: true,
           status_name: "Chưa tiếp nhận",

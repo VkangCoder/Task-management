@@ -38,6 +38,11 @@ const uploadImageFromLocal = async (filePath, userId) => {
     }
   } catch (error) {
     console.error("Error uploading image to Cloudinary: ", error);
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack,
+      // Log ra thêm các thuộc tính cụ thể nếu error object có chúng
+    });
     return {
       success: false,
       message: "Failed to upload image.",
