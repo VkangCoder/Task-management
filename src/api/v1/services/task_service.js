@@ -213,6 +213,9 @@ module.exports = {
         case 3:
           newStatus = "Đã hoàn thành";
           break;
+        case 4:
+          newStatus = "Từ chối";
+          break;
         default:
           throw new BadRequestError("Invalid status code");
       }

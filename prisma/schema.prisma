@@ -123,7 +123,7 @@ model tasks {
   users_tasks_created_byTousers users       @relation("tasks_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   task_status                   task_status @relation(fields: [current_status_id], references: [id])
   users_tasks_updated_byTousers users?      @relation("tasks_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
+} 
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model users {

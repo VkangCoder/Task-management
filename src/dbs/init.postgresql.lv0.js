@@ -16,7 +16,7 @@ class Database {
         rejectUnauthorized: true,
         ca: caCert, // Thêm chứng chỉ CA
       },
-      max: 3,
+      max: 10,
       idleTimeoutMillis: 30000, // Thời gian chờ trước khi một kết nối không hoạt động được đóng
       connectionTimeoutMillis: 2000, // Thời gian chờ kết nối tối đa
     });
