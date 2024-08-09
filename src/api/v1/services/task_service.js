@@ -8,6 +8,7 @@ const { buildWhereClause } = require("../../../utils/searchUtils");
 const {
   validatedUserId,
   validateRefDepartment,
+  validateRefTaskType,
 } = require("../../../middleware/validate/validateReferencer");
 const { format } = require("date-fns");
 const { createNotificationService } = require("./notification_service");
@@ -142,7 +143,7 @@ module.exports = {
     //Bước 1 check validate các trường tham chiếu ( khóa ngoiaj)
     console.log(Tasks.task_types_id);
     const holderDepartment = await validateRefDepartment(Tasks.department_id);
-    await validateRefDepartment(Tasks.task_types_id);
+    await validateRefTaskType(Tasks.task_types_id);
     // Lấy ra toàn bộ User trong department này
     const departmentUsers = await prisma.users.findMany({
       where: { department_id: Tasks.department_id },
