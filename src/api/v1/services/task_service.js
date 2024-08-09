@@ -38,7 +38,11 @@ module.exports = {
       include: {
         users_tasks_updated_byTousers: true,
         users_tasks_created_byTousers: true,
-
+        task_status: {
+          include: {
+            users: true,
+          },
+        },
         department: true,
         task_types: true,
       },
@@ -64,7 +68,7 @@ module.exports = {
       };
       delete formatTask.users_tasks_updated_byTousers;
       delete formatTask.users_tasks_created_byTousers;
-
+      delete formatTask.task_status;
       delete formatTask.department;
       delete formatTask.task_types;
 
