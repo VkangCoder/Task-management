@@ -38,7 +38,11 @@ module.exports = {
       include: {
         users_tasks_updated_byTousers: true,
         users_tasks_created_byTousers: true,
-        task_status: true,
+        task_status: {
+          include: {
+            users: true,
+          },
+        },
         department: true,
         task_types: true,
       },
@@ -61,7 +65,9 @@ module.exports = {
         status_change: {
           old_value: task.task_status.old_value, // Cần có cơ chế để truy xuất giá trị này
           new_value: task.task_status.new_value, // Cần có cơ chế để truy xuất giá trị này
-          received_by: task.task_status.updated_by,
+          received_by: task.task_status.updated_by
+            ? task.task_status.users.fullname
+            : null,
         },
         department_id: task.department.department_name,
         task_types_id: task.task_types.type_name,
@@ -71,6 +77,7 @@ module.exports = {
       delete formatTask.task_status;
       delete formatTask.department;
       delete formatTask.task_types;
+      
       return formatTask;
     });
     if (Tasks.length === 0) {
@@ -141,7 +148,7 @@ module.exports = {
   // },
   createTasksService: async (Tasks, userId) => {
     //Bước 1 check validate các trường tham chiếu ( khóa ngoiaj)
-    console.log(Tasks.task_types_id);
+
     const holderDepartment = await validateRefDepartment(Tasks.department_id);
     await validateRefTaskType(Tasks.task_types_id);
     // Lấy ra toàn bộ User trong department này
@@ -156,7 +163,7 @@ module.exports = {
           task_id: null, // Sẽ cập nhật sau khi task được tạo
           old_value: "Chưa tiếp nhận", // Giả định không có trạng thái trước đó
           new_value: "Chưa tiếp nhận",
-
+          created_by: userId,
           updated_time: new Date(),
           status: true,
           status_name: "Chưa tiếp nhận",
