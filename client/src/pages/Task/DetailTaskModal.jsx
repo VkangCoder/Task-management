@@ -17,33 +17,15 @@ const TagAssigneeCustom = ({ department_id }) => {
 }
 
 const TagCustom = ({ props }) => {
-    let backgroundColor = '#034752'
     return (
         <Tag
+            color="geekblue"
             style={{
                 fontSize: '14px',
-                backgroundColor: backgroundColor,
-                color: '#fff',
             }}>
             {props}
         </Tag>
     )
-}
-
-const TagPersonHandle = ({ props }) => {
-    let style = {
-        fontSize: '14px',
-        backgroundColor: '#034752', // Mặc định là màu xanh dương đậm
-        color: '#fff',
-    }
-
-    if (!props) {
-        style.backgroundColor = '#CC0000' // Đỏ cho trạng thái 'Chưa tiếp nhận'
-        style.color = '#fff'
-        props = <strong>Chưa tiếp nhận</strong>
-    }
-
-    return <Tag style={style}>{props}</Tag>
 }
 
 const TagCurrentStatusCustom = ({ currentStatusId }) => {
@@ -90,10 +72,7 @@ function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
                       <TagAssigneeCustom department_id={task.department_id} />
                   ),
               },
-              {
-                  label: 'Người tạo',
-                  content: <TagCustom props={task.created_by} />,
-              },
+
               {
                   label: 'Mô tả',
                   content: (
@@ -112,7 +91,6 @@ function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
               },
               {
                   label: 'Lịch sử trạng thái',
-                  //   content: <TimeLineCustom taskStatus={task.id} />,
                   content:
                       task.current_status_id === 'Chưa tiếp nhận' ? (
                           <div>
@@ -122,6 +100,10 @@ function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
                       ) : (
                           <TimeLineCustom taskStatus={task.id} />
                       ),
+              },
+              {
+                  label: 'Người tạo',
+                  content: <TagCustom props={task.created_by} />,
               },
           ]
         : []

@@ -54,7 +54,9 @@ const TimeLineCustom = ({ taskStatus }) => {
                         color={getColorForStatus(status.status)}
                         label={status.time} // Thêm label để hiển thị ngày giờ
                     >
-                        <h4>{status.title}</h4>
+                        <h4 style={{ color: getColorForStatus(status.status) }}>
+                            {status.title}
+                        </h4>
                         <TagPersonHandle props={status.handler} />
                         <p>{status.description}</p>
                     </Timeline.Item>

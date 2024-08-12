@@ -4,9 +4,8 @@ import { Button, Space, Tag } from 'antd'
 // Định danh button type cho tab trang task
 export const taskTabButton = [
     { key: 'all', label: 'Tất cả' },
-    { key: 'delivering', label: 'Chưa tiếp nhận' },
-    { key: 'received', label: 'Đã tiếp nhận' },
-    { key: 'completed', label: 'Đã hoàn thành' },
+    { key: 'request', label: 'Yêu Cầu' },
+    { key: 'completed', label: 'Kết quả' },
 ]
 
 // Định danh cột cho tab trang task

@@ -6,16 +6,19 @@ import './Task.css'
 import * as AuthService from '../../util/validate.js'
 import CustomPagination from '../../components/CustomPagination.jsx'
 import { taskColumns } from '../../util/config.jsx'
-import Tab from '../../components/Tab.jsx'
 import AddTaskModal from './AddTaskModal.jsx'
 import DetailTaskModal from './DetailTaskModal.jsx'
 import useFetchDepartmentId from '../../Hooks/useFetchDepartmentId.jsx'
+import NotificationCustom from '../../components/NotificationCustom.jsx'
+import TabTask from './TabTask.jsx'
+import CountDisplay from '../../components/CountDisplay.jsx'
 
 // const { Search } = Input
 const { Option } = Select
 
 function Task() {
     const [taskData, setTaskData] = useState([])
+    const [totalTaskCount, setTotalTaskCount] = useState([])
     //Fetch Data dựa trên current_status_id và Trạng thái activeView để lọc
     const [filteredData, setFilteredData] = useState([])
     const [activeView, setActiveView] = useState('all')
@@ -30,14 +33,17 @@ function Task() {
     const [selectedTask, setSelectedTask] = useState(null)
     //Bộ lộc
     const [departmentId, setDepartmentId] = useState(null)
+    //State thông báo
+    const [showNotification, setShowNotification] = useState(false)
     //Modal thêm
     const openModal = () => setModalVisible(true)
-    const closeModal = () => setModalVisible(false)
+
+    const closeModal = () => {
+        setModalVisible(false)
+    }
     //Modal chi tiết
     const openModalDetail = () => setIsDetailModal(true)
     const closeModalDetail = () => setIsDetailModal(false)
-    //State Search
-    // const [search, setSearch] = useState('')
 
     const pageLimit = 8
 
@@ -46,6 +52,16 @@ function Task() {
         setSelectedTask(task)
         openModalDetail()
     }
+
+    useEffect(() => {
+        if (showNotification) {
+            const timer = setTimeout(() => {
+                setShowNotification(false)
+            }, 3000) // Reset sau 3 giây
+
+            return () => clearTimeout(timer)
+        }
+    }, [showNotification])
 
     /* --------------------- Fetch Department ID ---------------------*/
     const getDepartmentId = useFetchDepartmentId()
@@ -80,6 +96,7 @@ function Task() {
                 const data = await response.json()
                 if (data && Array.isArray(data.metadata)) {
                     setTaskData(data.metadata)
+                    setTotalTaskCount(data.metadata)
                 } else {
                     console.error(
                         'Expected an array of Task, but received:',
@@ -93,7 +110,7 @@ function Task() {
 
         fetchData()
         // }, [page, activeView, refreshData, search, filterValues])
-    }, [page, refreshData, departmentId])
+    }, [page, refreshData, departmentId, taskData.length])
 
     // Bộ lộc current_status_id
     const filterTasks = (tasks, view) => {
@@ -101,8 +118,11 @@ function Task() {
         if (view !== 'all') {
             filtered = tasks.filter(task => {
                 switch (view) {
-                    case 'delivering':
-                        return task.current_status_id === 'Chưa tiếp nhận'
+                    case 'request':
+                        return (
+                            task.current_status_id === 'Chưa tiếp nhận' ||
+                            task.current_status_id === 'Đã tiếp nhận'
+                        )
                     case 'received':
                         return task.current_status_id === 'Đã tiếp nhận'
                     case 'completed':
@@ -125,17 +145,17 @@ function Task() {
     return (
         <Layout style={{ marginBottom: 16 }}>
             <HeaderComponent
-                title="Quản Lý Nhiệm vụ"
+                title="Quản lý Nhiệm vụ"
                 subTitle="Các nhiệm vụ hiện có"
             />
-            <Tab
+            <TabTask
                 buttonTitle={'Thêm task'}
                 onTabChange={setActiveView}
                 onClick={openModal}
             />
             <Layout style={{ padding: '0 50px 0 50px' }}>
-                <div style={{ display: 'flex' }}>
-                    <p>đwd</p>
+                <div style={{ display: 'flex', alignItems: 'baseline' }}>
+                    <CountDisplay count={totalTaskCount} />
                     <Select
                         defaultValue="Chọn phòng ban"
                         style={{ width: 200, marginBottom: 16 }}
@@ -203,8 +223,17 @@ function Task() {
                 onTaskAdded={() => {
                     setRefreshData(prev => !prev)
                     closeModal()
+                    setShowNotification(true)
                 }}
             />
+            {showNotification && (
+                <NotificationCustom
+                    type="success"
+                    message="Tạo Nhiệm Vụ Thành Công"
+                    description="Nhiệm vụ đã được thêm thành công vào cơ sở dữ liệu."
+                    placement="topRight"
+                />
+            )}
             <DetailTaskModal
                 modalTitle={'Chi Tiết Nhiệm Vụ'}
                 openDetail={isDetailModal}

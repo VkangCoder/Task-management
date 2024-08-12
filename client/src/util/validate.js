@@ -24,8 +24,7 @@ export const login = async (email, password) => {
             )
             return true
         } else {
-            alert('Thông tin đăng nhập không đúng')
-            return false
+            return { success: false, message: 'Thông tin đăng nhập không đúng' }
         }
     } catch (error) {
         console.error('Có lỗi xảy ra!', error)

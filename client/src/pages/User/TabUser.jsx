@@ -3,9 +3,9 @@ import { useState } from 'react'
 import { Button } from 'antd'
 import AddIcon from '@mui/icons-material/Add'
 // import AddModal from './AddModal'
-import { taskTabButton } from '../util/config'
+import { taskTabButton } from '../../util/config'
 
-function Tab({ buttonTitle, onTabChange, onClick }) {
+function TabUser({ buttonTitle, onTabChange, onClick }) {
     const [activeView, setActiveView] = useState('all')
 
     const handleTabClick = view => {
@@ -59,4 +59,4 @@ function Tab({ buttonTitle, onTabChange, onClick }) {
         </div>
     )
 }
-export default Tab
+export default TabUser
