@@ -1,9 +1,9 @@
 import { Header } from 'antd/es/layout/layout'
 import Typography from 'antd/es/typography/Typography'
-const { Title, Text } = Typography
+const { Title } = Typography
 
 // eslint-disable-next-line react/prop-types
-function HeaderComponent({ title, subTitle }) {
+function HeaderComponent({ title }) {
     return (
         <Header
             style={{
@@ -27,9 +27,6 @@ function HeaderComponent({ title, subTitle }) {
                     }}>
                     {title}
                 </Title>
-                <Text type="secondary" style={{ fontSize: '14px' }}>
-                    {subTitle}
-                </Text>
             </div>
         </Header>
     )

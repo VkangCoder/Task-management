@@ -4,8 +4,9 @@ import user from '../../assets/user.png'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { Header } from 'antd/es/layout/layout'
 import { Avatar, Typography } from 'antd'
-
+import NotificationCustom from '../../components/NotificationCustom'
 const { Title } = Typography
+
 function Topbar() {
     return (
         <Header
@@ -69,7 +70,11 @@ function Topbar() {
                     Quách Vĩnh Khang
                 </Title>
                 <KeyboardArrowDownIcon />
-                <BellFilled />
+                <NotificationCustom>
+                    <BellFilled
+                        style={{ fontSize: '24px', cursor: 'pointer' }}
+                    />
+                </NotificationCustom>
             </div>
         </Header>
     )

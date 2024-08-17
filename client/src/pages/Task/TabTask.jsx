@@ -1,10 +1,9 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react'
 import { Button } from 'antd'
-import AddIcon from '@mui/icons-material/Add'
 import { taskTabButton } from '../../util/config'
 
-function TabTask({ buttonTitle, onTabChange, onClick }) {
+function TabTask({ onTabChange }) {
     const [activeView, setActiveView] = useState('all')
 
     const handleTabClick = view => {
@@ -28,11 +27,10 @@ function TabTask({ buttonTitle, onTabChange, onClick }) {
     return (
         <div
             style={{
-                margin: '24px 0',
                 display: 'flex',
                 alignItems: 'center',
                 flexDirection: 'row',
-                padding: '0 50px',
+                padding: '40px 50px',
                 height: '50px',
             }}>
             <div
@@ -43,16 +41,6 @@ function TabTask({ buttonTitle, onTabChange, onClick }) {
                     alignItems: 'center',
                 }}>
                 <div>{taskTabButton.map(tab => renderButton(tab))}</div>
-                <Button
-                    icon={<AddIcon />}
-                    style={{
-                        width: 126,
-                        height: 44,
-                    }}
-                    type="primary"
-                    onClick={onClick}>
-                    {buttonTitle}
-                </Button>
             </div>
         </div>
     )

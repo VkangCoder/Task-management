@@ -1,30 +1,49 @@
 /* eslint-disable react/prop-types */
-import { notification } from 'antd'
-import { useEffect } from 'react'
+import { List, Popover } from 'antd'
+import useFetchNotifiByUser from '../Hooks/useFetchNotifiByUser'
 
-const NotificationCustom = ({ type, message, description, placement }) => {
-    // Hàm để hiển thị thông báo
-    const openNotification = () => {
-        notification[type]({
-            message: message,
-            description: description,
-            placement: placement,
-        })
-    }
+const NotificationCustom = ({ children }) => {
+    const notifications = useFetchNotifiByUser()
 
-    // Kích hoạt thông báo ngay khi component được render
-    useEffect(() => {
-        openNotification()
-    }, [])
+    const notificationContent = (
+        <List
+            itemLayout="vertical"
+            bordered
+            dataSource={notifications}
+            renderItem={item => (
+                <List.Item
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        padding: '12px',
+                    }}>
+                    <div style={{ fontWeight: 'bold' }}>{item.noti_type}</div>
+                    <p>{item.noti_content}</p>
 
-    return null // Component này không render gì cả, chỉ dùng để kích hoạt thông báo
-}
-
-NotificationCustom.defaultProps = {
-    type: 'info', // Các loại: success, error, info, warning
-    message: 'Thông báo mặc định',
-    description: 'Đây là nội dung mặc định của thông báo.',
-    placement: 'topRight', // Có thể thay đổi thành topRight, topLeft, bottomRight, bottomLeft
+                    <p>
+                        <b>Người gửi:</b> {item.noti_sender_id}
+                    </p>
+                    <p>
+                        <b>Ngày:</b>{' '}
+                        {new Date(item.created_at).toLocaleDateString()}
+                    </p>
+                    <p>
+                        <b>Trạng thái:</b> {item.notification_status_id}
+                    </p>
+                </List.Item>
+            )}
+        />
+    )
+    return (
+        <Popover
+            placement="bottomRight"
+            style={{ width: '500px' }}
+            content={notificationContent}
+            title={<h2>Thông Báo</h2>}>
+            {children}
+        </Popover>
+    )
 }
 
 export default NotificationCustom

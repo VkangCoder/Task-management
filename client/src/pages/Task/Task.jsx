@@ -12,13 +12,15 @@ import useFetchDepartmentId from '../../Hooks/useFetchDepartmentId.jsx'
 import NotificationCustom from '../../components/NotificationCustom.jsx'
 import TabTask from './TabTask.jsx'
 import CountDisplay from '../../components/CountDisplay.jsx'
-
+import InfoIcon from '@mui/icons-material/Info'
+import DeleteIcon from '@mui/icons-material/Delete'
+import ButtonCustom from '../../components/ButtonCustom.jsx'
 // const { Search } = Input
 const { Option } = Select
 
 function Task() {
     const [taskData, setTaskData] = useState([])
-    const [totalTaskCount, setTotalTaskCount] = useState([])
+    const [totalTaskCount, setTotalTaskCount] = useState(0)
     //Fetch Data dựa trên current_status_id và Trạng thái activeView để lọc
     const [filteredData, setFilteredData] = useState([])
     const [activeView, setActiveView] = useState('all')
@@ -74,33 +76,61 @@ function Task() {
                 return
             }
 
+            const token = localStorage.getItem('accessToken')
+            const baseUrl =
+                'https://task-management-be-ssq1.onrender.com/v1/tasks/getAllTasks'
+            const headers = {
+                Authorization: `${token}`,
+            }
+
+            // Đường dẫn lấy dữ liệu phân trang
+            let paginatedUrl = `${baseUrl}?page=${page}&limit=${pageLimit}`
+            if (departmentId) {
+                paginatedUrl += `&filterField=department_id&operator==&value=${departmentId}`
+            }
+
+            // Đường dẫn lấy tổng số nhiệm vụ (không phân trang)
+            let totalCountUrl = `${baseUrl}`
+            if (departmentId) {
+                totalCountUrl += `?filterField=department_id&operator==&value=${departmentId}`
+            }
+
             try {
-                const token = localStorage.getItem('accessToken')
-                const baseUrl =
-                    'https://task-management-be-ssq1.onrender.com/v1/tasks/getAllTasks'
-                let url = `${baseUrl}?page=${page}&limit=${pageLimit}`
-
-                if (departmentId) {
-                    url += `&filterField=department_id&operator==&value=${departmentId}`
-                }
-
-                const response = await fetch(url, {
+                // Gọi API lấy dữ liệu phân trang
+                const paginatedResponse = await fetch(paginatedUrl, {
                     method: 'GET',
-                    headers: {
-                        Authorization: `${token}`,
-                    },
+                    headers,
                 })
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`)
-                }
-                const data = await response.json()
-                if (data && Array.isArray(data.metadata)) {
-                    setTaskData(data.metadata)
-                    setTotalTaskCount(data.metadata)
+                const paginatedData = await paginatedResponse.json()
+                if (!paginatedResponse.ok)
+                    throw new Error(
+                        `HTTP error! status: ${paginatedResponse.status}`
+                    )
+                if (paginatedData && Array.isArray(paginatedData.metadata)) {
+                    setTaskData(paginatedData.metadata)
                 } else {
                     console.error(
                         'Expected an array of Task, but received:',
-                        data
+                        paginatedData
+                    )
+                }
+
+                // Gọi API lấy tổng số nhiệm vụ
+                const totalCountResponse = await fetch(totalCountUrl, {
+                    method: 'GET',
+                    headers,
+                })
+                const totalCountData = await totalCountResponse.json()
+                if (!totalCountResponse.ok)
+                    throw new Error(
+                        `HTTP error! status: ${totalCountResponse.status}`
+                    )
+                if (totalCountData && Array.isArray(totalCountData.metadata)) {
+                    setTotalTaskCount(totalCountData.metadata.length)
+                } else {
+                    console.error(
+                        'Expected an array of Task, but received:',
+                        totalCountData
                     )
                 }
             } catch (error) {
@@ -109,30 +139,29 @@ function Task() {
         }
 
         fetchData()
-        // }, [page, activeView, refreshData, search, filterValues])
-    }, [page, refreshData, departmentId, taskData.length])
+    }, [page, refreshData, departmentId])
 
     // Bộ lộc current_status_id
     const filterTasks = (tasks, view) => {
         let filtered = tasks
-        if (view !== 'all') {
-            filtered = tasks.filter(task => {
-                switch (view) {
-                    case 'request':
-                        return (
-                            task.current_status_id === 'Chưa tiếp nhận' ||
-                            task.current_status_id === 'Đã tiếp nhận'
-                        )
-                    case 'received':
-                        return task.current_status_id === 'Đã tiếp nhận'
-                    case 'completed':
-                        return task.current_status_id === 'Đã hoàn thành'
-                    case 'deleted':
-                        return task.current_status_id === 'Đã xóa'
-                    default:
-                        return true
-                }
-            })
+        switch (view) {
+            case 'request':
+                filtered = tasks.filter(
+                    task =>
+                        task.current_status_id === 'Chưa tiếp nhận' ||
+                        task.current_status_id === 'Đã tiếp nhận'
+                )
+                break
+            case 'completed':
+                filtered = tasks.filter(
+                    task =>
+                        task.current_status_id === 'Đã hoàn thành' ||
+                        task.current_status_id === 'Đã từ chối'
+                )
+                break
+            default:
+                filtered = tasks
+                break
         }
         setFilteredData(filtered)
     }
@@ -144,21 +173,14 @@ function Task() {
 
     return (
         <Layout style={{ marginBottom: 16 }}>
-            <HeaderComponent
-                title="Quản lý Nhiệm vụ"
-                subTitle="Các nhiệm vụ hiện có"
-            />
-            <TabTask
-                buttonTitle={'Thêm task'}
-                onTabChange={setActiveView}
-                onClick={openModal}
-            />
+            <HeaderComponent title="Danh sách các nhiệm vụ" />
+            <TabTask buttonTitle={'Thêm'} onTabChange={setActiveView} />
             <Layout style={{ padding: '0 50px 0 50px' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
                     <CountDisplay count={totalTaskCount} />
                     <Select
                         defaultValue="Chọn phòng ban"
-                        style={{ width: 200, marginBottom: 16 }}
+                        style={{ width: 200, margin: '0 10px' }}
                         onChange={value => setDepartmentId(value)}>
                         {getDepartmentId.map(department => (
                             <Option key={department.id} value={department.id}>
@@ -166,6 +188,7 @@ function Task() {
                             </Option>
                         ))}
                     </Select>
+                    <ButtonCustom buttonTitle={'Thêm'} onClick={openModal} />
                 </div>
                 <Table
                     columns={taskColumns.map(col => {
@@ -179,23 +202,18 @@ function Task() {
                                                 handleOpenDetailModal(task)
                                             }
                                             style={{
-                                                border: '1px solid #152B3D',
-                                                width: '73px',
-                                                height: '26px',
                                                 color: '#152B3D',
                                             }}
                                             type="link">
-                                            Chi tiết
+                                            <InfoIcon />
                                         </Button>
+
                                         <Button
                                             style={{
-                                                border: '1px solid #CC0000',
-                                                width: '73px',
-                                                height: '26px',
-                                                color: '#CC0000',
+                                                color: '#152b3d',
                                             }}
                                             type="link">
-                                            Xóa
+                                            <DeleteIcon />
                                         </Button>
                                     </Space>
                                 ),

@@ -3,7 +3,6 @@ import { Button, Space, Tag } from 'antd'
 /**--------------------- Trang Task ---------------------*/
 // Định danh button type cho tab trang task
 export const taskTabButton = [
-    { key: 'all', label: 'Tất cả' },
     { key: 'request', label: 'Yêu Cầu' },
     { key: 'completed', label: 'Kết quả' },
 ]
@@ -20,24 +19,6 @@ export const taskColumns = [
         dataIndex: 'title',
         key: 'title',
     },
-    // {
-    //     title: 'Mức độ ưu tiên',
-    //     dataIndex: 'priority',
-    //     key: 'priority',
-    //     render: priority => {
-    //         let backgroundColor = '#CC0000' //mặc định là Cao
-    //         if (priority === 'Trung bình')
-    //             backgroundColor = '#DACF71' // Trung bình
-    //         else if (priority === 'Thấp') backgroundColor = '#4DB134' // Thấp
-    //         return (
-    //             <Tag
-    //                 key={priority}
-    //                 style={{ backgroundColor, color: '#FFFFFF' }}>
-    //                 {priority}
-    //             </Tag>
-    //         )
-    //     },
-    // },
     {
         title: 'Người tạo',
         dataIndex: 'created_by',
@@ -59,7 +40,7 @@ export const taskColumns = [
         key: 'task_types_id',
         render: task_types_id => {
             return (
-                <Tag key={task_types_id} color="magenta">
+                <Tag key={task_types_id} color="default">
                     {task_types_id}
                 </Tag>
             )
@@ -131,4 +112,3 @@ export const taskColumns = [
         ),
     },
 ]
-// filter

@@ -1,58 +1,48 @@
 /* eslint-disable react/prop-types */
-import { Modal, Typography, Descriptions, Tag, Spin } from 'antd'
-import TimeLineCustom from '../../components/TimeLineCustom'
-const { Title } = Typography
-
-const TagAssigneeCustom = ({ department_id }) => {
-    let color = '#4B8BF4'
-    if (department_id === 'Phòng Kế Toán') color = '#F4A641'
-    else if (department_id === 'Phòng Marketing') color = '#34D399'
-    return (
-        <Tag
-            key={department_id}
-            style={{ backgroundColor: 'rgba(31, 71, 214, 0.1)', color: color }}>
-            {department_id}
-        </Tag>
-    )
-}
-
-const TagCustom = ({ props }) => {
-    return (
-        <Tag
-            color="geekblue"
-            style={{
-                fontSize: '14px',
-            }}>
-            {props}
-        </Tag>
-    )
-}
+import { Modal, Typography, Descriptions, Input, Button } from 'antd'
+const { Title, Text } = Typography
+import picture from '../../assets/fake img/Lẩu Tứ Xuyên.jpg'
 
 const TagCurrentStatusCustom = ({ currentStatusId }) => {
     let color = '#CC0000' //mặc định là  Chưa tiếp nhận
     if (currentStatusId === 'Đã tiếp nhận') color = '#1F47D6' // Đã tiếp nhận
     else if (currentStatusId === 'Đã hoàn thành') color = '#348E1D' // Đã hoàn thành
     return (
-        <span key={currentStatusId} style={{ color, marginLeft: '10px' }}>
+        <span key={currentStatusId} style={{ color }}>
             {currentStatusId}
         </span>
     )
 }
 
-const StyledDescription = ({ children }) => {
+const StyledImage = ({ image }) => {
+    return (
+        <div
+            style={{
+                padding: '8px',
+                border: '1px solid #ccc',
+                marginBottom: '20px',
+            }}>
+            <img
+                src={image}
+                alt="Đính kèm"
+                style={{ width: '100%', height: 'auto' }}
+            />
+        </div>
+    )
+}
+
+const StyledDescription = ({ content }) => {
     return (
         <div
             style={{
                 padding: '8px 12px',
                 minHeight: '90px',
-                border: '1px solid #d9d9d9',
-                borderRadius: '4px',
                 background: '#fff',
                 color: '#000',
                 fontSize: '14px',
                 overflow: 'auto',
             }}>
-            <p>{children}</p>
+            <p>{content}</p>
         </div>
     )
 }
@@ -60,29 +50,20 @@ const StyledDescription = ({ children }) => {
 function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
     const items = task
         ? [
-              { label: 'Mã nhiệm vụ', content: task.id },
-              { label: 'Tên nhiệm vụ', content: task.title },
               {
-                  label: 'Loại nhiệm vụ',
-                  content: <Tag color="magenta">{task.task_types_id}</Tag>,
+                  label: <Text strong>Người tạo</Text>,
+                  content: <p>{task.created_by}</p>,
               },
               {
-                  label: 'Phòng phân công',
-                  content: (
-                      <TagAssigneeCustom department_id={task.department_id} />
-                  ),
-              },
-
-              {
-                  label: 'Mô tả',
-                  content: (
-                      <StyledDescription>
-                          <p style={{ fontSize: '16px' }}>{task.description}</p>
-                      </StyledDescription>
-                  ),
+                  label: <Text strong>Ngày tạo</Text>,
+                  content: <p>{task.created_at}</p>,
               },
               {
-                  label: 'Trạng thái',
+                  label: <Text strong>Phòng phân công</Text>,
+                  content: <p>{task.department_id}</p>,
+              },
+              {
+                  label: <Text strong>Trạng Thái</Text>,
                   content: (
                       <TagCurrentStatusCustom
                           currentStatusId={task.current_status_id}
@@ -90,52 +71,86 @@ function DetailTaskModal({ openDetail, onClose, task, modalTitle }) {
                   ),
               },
               {
-                  label: 'Lịch sử trạng thái',
-                  content:
-                      task.current_status_id === 'Chưa tiếp nhận' ? (
-                          <div>
-                              <Spin />
-                              <TagCurrentStatusCustom currentStatusId="Đang đợi tiếp nhận" />
-                          </div>
-                      ) : (
-                          <TimeLineCustom taskStatus={task.id} />
-                      ),
+                  label: <Text strong>File đính kèm</Text>,
+                  content: <a href="#">Link</a>,
               },
               {
-                  label: 'Người tạo',
-                  content: <TagCustom props={task.created_by} />,
+                  label: <Text strong>Hình ảnh đính kèm</Text>,
+                  content: <StyledImage image={picture} />,
+              },
+              {
+                  label: <Text strong>Nội dung yêu cầu</Text>,
+                  content: <StyledDescription content={task.description} />,
+              },
+              {
+                  label: <Text strong>Đóng góp ý kiến</Text>,
+                  content: (
+                      <Input.TextArea
+                          rows={4}
+                          placeholder="Nhập đóng góp ý kiến"
+                      />
+                  ),
               },
           ]
         : []
+
+    if (task && task.current_status_id === 'Đã hoàn thành') {
+        items.splice(
+            2,
+            0,
+            {
+                label: <Text strong>Ngày xử lý</Text>,
+                content: <p>{task.updated_at}</p>,
+            },
+            {
+                label: <Text strong>Người xử lý</Text>,
+                content: <p>{task.updated_by}</p>,
+            }
+        )
+    }
 
     return (
         <Modal
             open={openDetail}
             onCancel={onClose}
-            onOk={onClose}
-            width={900}
-            height={700}
-            style={{ top: 50 }}>
+            width={700}
+            style={{ top: 20 }}
+            footer={[
+                <Button key="submit" type="primary" onClick={onClose}>
+                    Xác nhận
+                </Button>,
+            ]}>
             <Title
                 level={4}
                 style={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
                     borderBottom: '1px solid #D9D9D9',
-                    paddingBottom: '16px',
+                    paddingBottom: '10px',
                 }}>
                 {modalTitle}
             </Title>
             <Descriptions
-                bordered
                 column={1}
                 size="small"
-                items={items.map(item => ({
-                    label: item.label,
-                    children: item.content,
-                }))}
-            />
-            {!task && <p>No task data available.</p>}
+                style={{ marginBottom: '20px' }}>
+                <Descriptions.Item span={2}>
+                    <Descriptions column={2}>
+                        {items.slice(0, 4).map((item, index) => (
+                            <Descriptions.Item label={item.label} key={index}>
+                                {item.content}
+                            </Descriptions.Item>
+                        ))}
+                    </Descriptions>
+                </Descriptions.Item>
+                <Descriptions.Item span={2}>
+                    <Descriptions column={1}>
+                        {items.slice(4).map((item, index) => (
+                            <Descriptions.Item label={item.label} key={index}>
+                                {item.content}
+                            </Descriptions.Item>
+                        ))}
+                    </Descriptions>
+                </Descriptions.Item>
+            </Descriptions>
         </Modal>
     )
 }

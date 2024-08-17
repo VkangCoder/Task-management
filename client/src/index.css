@@ -110,3 +110,10 @@
 .ant-btn-primary {
     background-color: #050a24 !important;
 }
+
+.ant-popover-inner {
+    width: 500px;
+    overflow: auto;
+    max-height: 700px;
+    width: 100%;
+}
