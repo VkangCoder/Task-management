@@ -4,6 +4,9 @@ const {
   createTaskController,
   receiveTaskController,
   getAllTasksByUserIdController,
+
+  CountAllTask1ByTaskStatus,
+  CountAllTask2ByTaskStatus,
 } = require("../controllers/task_controller");
 const { verifyAccessToken } = require("../services/jwt_service");
 const asyncHandler = require("../../../middleware/handleError");
@@ -21,6 +24,18 @@ TaskRoutes.get(
   verifyAccessToken,
   checkRolePermission("Read"),
   asyncHandler(getAllTasksByUserIdController)
+);
+TaskRoutes.get(
+  "/countTask1",
+  verifyAccessToken,
+  checkRolePermission("Read"),
+  asyncHandler(CountAllTask1ByTaskStatus)
+);
+TaskRoutes.get(
+  "/countTask2",
+  verifyAccessToken,
+  checkRolePermission("Read"),
+  asyncHandler(CountAllTask2ByTaskStatus)
 );
 TaskRoutes.post(
   "/createTasks",

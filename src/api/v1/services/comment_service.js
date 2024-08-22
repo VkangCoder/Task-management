@@ -9,101 +9,73 @@ const {
   validatedUserId,
   validateRefDepartment,
   validateRefTaskType,
+  validatedReFTaskId,
 } = require("../../../middleware/validate/validateReferencer");
 const { format } = require("date-fns");
 const { createNotificationService } = require("./notification_service");
 
-const TaskStatusCodes = {
-  2: "Đã tiếp nhận",
-  3: "Đã hoàn thành",
-};
-
 module.exports = {
-  getAllTasksService: async (queryParams) => {
-    const { filterField, operator, value, page, limit } = queryParams;
+  //   getAllCommentsService: async (queryParams) => {
+  //     const { filterField, operator, value, page, limit } = queryParams;
 
-    // Fetch all with pagination
-    const pageNum = parseInt(page) || 1; // Mặc định là trang 1 nếu không được cung cấp
-    const pageSize = parseInt(limit) || 10; // Mặc định 10 sản phẩm mỗi trang nếu không được cung cấp
-    const skip = (pageNum - 1) * pageSize;
-    const where = await buildWhereClause({ filterField, operator, value });
-    //sort DESC
-    const orderBy = { created_at: "desc" }; // Thay 'desc' bằng 'asc' nếu bạn muốn sắp xếp tăng dần
+  //     // Fetch all with pagination
+  //     const pageNum = parseInt(page) || 1; // Mặc định là trang 1 nếu không được cung cấp
+  //     const pageSize = parseInt(limit) || 10; // Mặc định 10 sản phẩm mỗi trang nếu không được cung cấp
+  //     const skip = (pageNum - 1) * pageSize;
+  //     const where = await buildWhereClause({ filterField, operator, value });
+  //     //sort DESC
+  //     const orderBy = { created_at: "desc" }; // Thay 'desc' bằng 'asc' nếu bạn muốn sắp xếp tăng dần
 
-    let Tasks = await prisma.tasks.findMany({
-      skip: skip,
-      take: pageSize,
-      where,
-      orderBy,
-      include: {
-        users_tasks_updated_byTousers: true,
-        users_tasks_created_byTousers: true,
-        task_status: {
-          include: {
-            users: true,
-          },
-        },
-        department: true,
-        task_types: true,
-      },
-    });
-    Tasks = Tasks.map((task) => {
-      const formatTask = {
-        ...task,
-        created_at: format(new Date(task.created_at), "yyyy-MM-dd "),
-        updated_at: task.updated_at
-          ? format(new Date(task.updated_at), "yyyy-MM-dd")
-          : "Chưa Cập Nhật",
+  //     let Comments = await prisma.tasks.findMany({
+  //       skip: skip,
+  //       take: pageSize,
+  //       where,
+  //       orderBy,
+  //       include: {
+  //         users_tasks_updated_byTousers: true,
+  //         users_tasks_created_byTousers: true,
+  //         task_status: {
+  //           include: {
+  //             users: true,
+  //           },
+  //         },
+  //         department: true,
+  //         task_types: true,
+  //       },
+  //     });
+  //     Comments = Comments.map((task) => {
+  //       const formatTask = {
+  //         ...task,
+  //         created_at: format(new Date(task.created_at), "yyyy-MM-dd "),
+  //         updated_at: task.updated_at
+  //           ? format(new Date(task.updated_at), "yyyy-MM-dd")
+  //           : "Chưa Cập Nhật",
 
-        created_by: task.users_tasks_created_byTousers.fullname,
-        updated_by: task.users_tasks_updated_byTousers
-          ? task.users_tasks_updated_byTousers.fullname
-          : "Chưa Cập Nhật",
+  //         created_by: task.users_tasks_created_byTousers.fullname,
+  //         updated_by: task.users_tasks_updated_byTousers
+  //           ? task.users_tasks_updated_byTousers.fullname
+  //           : "Chưa Cập Nhật",
 
-        //current_status cần phải update theo thời gian thực
-        current_status_id: task.task_status.status_name,
+  //         //current_status cần phải update theo thời gian thực
+  //         current_status_id: task.task_status.status_name,
 
-        department_id: task.department.department_name,
-        task_types_id: task.task_types.type_name,
-      };
-      delete formatTask.users_tasks_updated_byTousers;
-      delete formatTask.users_tasks_created_byTousers;
-      delete formatTask.task_status;
-      delete formatTask.department;
-      delete formatTask.task_types;
+  //         department_id: task.department.department_name,
+  //         task_types_id: task.task_types.type_name,
+  //       };
+  //       delete formatTask.users_tasks_updated_byTousers;
+  //       delete formatTask.users_tasks_created_byTousers;
+  //       delete formatTask.task_status;
+  //       delete formatTask.department;
+  //       delete formatTask.task_types;
 
-      return formatTask;
-    });
-    if (Tasks.length === 0) {
-      return [];
-    }
-    return Tasks;
-  },
-  getAllTask1ByTaskStatus: async () => {
-    let Tasks = await prisma.tasks.count({
-      where: {
-        task_status: {
-          status_name: {
-            in: ["Mới", "Đã tiếp nhận"],
-          },
-        },
-      },
-    });
-    return Tasks;
-  },
-  getAllTask2ByTaskStatus: async () => {
-    let Tasks = await prisma.tasks.count({
-      where: {
-        task_status: {
-          status_name: {
-            in: ["Đã hoàn thành"],
-          },
-        },
-      },
-    });
-    return Tasks;
-  },
-  // getAllTasksServiceByUserId: async (queryParams, UserId) => {
+  //       return formatTask;
+  //     });
+  //     if (Comments.length === 0) {
+  //       return [];
+  //     }
+  //     return Comments;
+  //   },
+  // getAllCommentsServiceByUserId: async (queryParams, UserId) => {
   //   const { filterField, operator, value, page, limit, sortBy, sortOrder } =
   //     queryParams;
 
@@ -118,7 +90,7 @@ module.exports = {
   //   if (UserId) {
   //     where.assignee_id = parseInt(UserId);
   //   }
-  //   let Tasks = await prisma.tasks.findMany({
+  //   let Comments = await prisma.tasks.findMany({
   //     skip: skip,
   //     take: pageSize,
   //     where,
@@ -130,7 +102,7 @@ module.exports = {
   //       task_status: true,
   //     },
   //   });
-  //   Tasks = Tasks.map((task) => {
+  //   Comments = Comments.map((task) => {
   //     const formatTask = {
   //       ...task,
   //       created_at: format(new Date(task.created_at), "yyyy-MM-dd "),
@@ -159,72 +131,74 @@ module.exports = {
 
   //     return formatTask;
   //   });
-  //   if (Tasks.length === 0) {
+  //   if (Comments.length === 0) {
   //     return [];
   //   }
-  //   return Tasks;
+  //   return Comments;
   // },
-  createTasksService: async (Tasks, userId) => {
+  createCommentsService: async (Comments, userId) => {
     //Bước 1 check validate các trường tham chiếu ( khóa ngoiaj)
-
-    const holderDepartment = await validateRefDepartment(Tasks.department_id);
-    await validateRefTaskType(Tasks.task_types_id);
-    // Lấy ra toàn bộ User trong department này
-    const departmentUsers = await prisma.users.findMany({
-      where: { department_id: Tasks.department_id },
-    });
-
+    await validatedReFTaskId(Comments.task_id);
     //B2 : tạo 1 bản ghi mặc định status của 1 task sẽ là chưa tiếp nhận
     const result = await prisma.$transaction(async (prisma) => {
-      const initialStatus = await prisma.task_status.create({
+      const newComment = await prisma.comments.create({
         data: {
-          task_id: null, // Sẽ cập nhật sau khi task được tạo
-          old_value: "Mới", // Giả định không có trạng thái trước đó
-          new_value: "Mới",
+          task_id: Comments.task_id,
           created_by: userId,
-          updated_time: new Date(),
-          status: true,
-          status_name: "Mới",
+          created_at: new Date(),
+          comment: Comments.comment,
+          comment_type: Comments.comment_type,
         },
       });
-      //
-      //Bước 3 : tạo task với current_status vừa đc tạo nên
-      const newTasks = await prisma.tasks.create({
-        data: {
-          title: Tasks.title,
-          description: Tasks.description,
-          department_id: Tasks.department_id,
-          task_types_id: Tasks.task_types_id,
-          created_by: userId,
-          current_status_id: initialStatus.id, // Thêm cột này để lưu trữ trạng thái hiện tại của task
-
-          status: true,
-        },
-      });
-
-      return newTasks;
+      let updatedTask;
+      if (Comments.comment_type === "creator_comment") {
+        updatedTask = await prisma.tasks.update({
+          where: { id: Comments.task_id },
+          data: {
+            comment_id: newComment.id,
+          },
+          select: {
+            id: true,
+            comment_id: true,
+          },
+        });
+      } else { 
+        updatedTask = await prisma.task_status.update({
+          where: { task_id: Comments.task_id },
+          data: { comment_id: newComment.id },
+          select: {
+            id: true,
+            task_id: true,
+            comment_id: true,
+          },
+        });
+      }
+      return {
+        newComment: newComment,
+        updatedTask: updatedTask,
+      };
     });
+    return {
+      metadata: {
+        comment_details: {
+          id: result.newComment.id,
+          task_id: result.newComment.task_id,
+          created_by: result.newComment.created_by,
+          created_at: result.newComment.created_at,
+          comment: result.newComment.comment,
+          comment_type: result.newComment.comment_type,
+        },
+        task_details: result.updatedTask,
+      },
+    };
     //Sau khi tạo mới 1 task tạo thêm thông báo đi kèm
-
-    await Promise.all(
-      departmentUsers.map((member) => {
-        const notificationData = {
-          noti_type: "Task Assignment",
-          noti_content: `${result.title}`,
-          noti_receive_id: member.id,
-          notification_status_id: 1,
-          noti_sender_id: result.created_by,
-        };
-        return createNotificationService(notificationData, result.created_by);
-      })
-    );
-    return result;
   },
-  receiveTaskService: async (Tasks, userId) => {
+
+  receiveTaskService: async (Comments, userId) => {
     const result = await prisma.$transaction(async (prisma) => {
       //bước 1 tìm task cần nhận
       const task = await prisma.tasks.findUnique({
-        where: { id: Tasks.id },
+        where: { id: Comments.id },
         include: { task_status: true },
       });
       if (!task) {
@@ -232,7 +206,7 @@ module.exports = {
       }
       // biến đổi các enum 2 thành Đã tiếp nhận , 3 thành Đã hoàn thành
       let newStatus;
-      switch (Tasks.new_value) {
+      switch (Comments.new_value) {
         case 2:
           newStatus = "Đã tiếp nhận";
           break;
@@ -266,7 +240,7 @@ module.exports = {
       //bước 3 tạo bản ghi để theo dõi sự cập nhật trạng thái của task đó
       const statusChange = await prisma.task_status.create({
         data: {
-          task_id: Tasks.id,
+          task_id: Comments.id,
           old_value: oldStatus,
           new_value: newStatus,
           updated_by: userId,
@@ -282,7 +256,7 @@ module.exports = {
         noti_content: `${userId}đã tiếp nhận task của bạn`,
 
         noti_receive_id: task.created_by,
-        notification_status_id: Tasks.notification_status_id, // Giả sử status_id là 1 cho trạng thái đã tiếp nhận
+        notification_status_id: Comments.notification_status_id, // Giả sử status_id là 1 cho trạng thái đã tiếp nhận
         noti_sender_id: userId,
       };
       const notification = await createNotificationService(
@@ -292,7 +266,7 @@ module.exports = {
       //
       //bước 5: update current_task_id của Task đó thành mới nhất
       const updateTask = await prisma.tasks.update({
-        where: { id: Tasks.id },
+        where: { id: Comments.id },
         data: {
           current_status_id: statusChange.id,
 

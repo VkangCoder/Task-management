@@ -15,6 +15,18 @@ module.exports = {
     }
     return userExists;
   },
+  validatedReFTaskId: async (id) => {
+    const userExists = await prisma.tasks.findUnique({
+      where: { id: id },
+      select: {
+        id: true,
+      },
+    });
+    if (!userExists) {
+      throw new NotFoundError("Id task không tồn tại");
+    }
+    return userExists;
+  },
 
   validateRefRole: async (id) => {
     const isExistFloor = await prisma.roles.findUnique({

@@ -3,6 +3,9 @@ const {
   getAllTasksService,
   createTasksService,
   receiveTaskService,
+
+  getAllTask1ByTaskStatus,
+  getAllTask2ByTaskStatus,
 } = require("../services/task_service.js");
 module.exports = {
   getAllTasksController: async (req, res, next) => {
@@ -16,6 +19,18 @@ module.exports = {
     new OK({
       message: "Get All Tasks Succesful! : ",
       metadata: await getAllTasksServiceByUserId(req.query, UserId),
+    }).send(res);
+  },
+  CountAllTask1ByTaskStatus: async (req, res, next) => {
+    new OK({
+      message: "Count All Tasks Succesful! : ",
+      metadata: await getAllTask1ByTaskStatus(),
+    }).send(res);
+  },
+  CountAllTask2ByTaskStatus: async (req, res, next) => {
+    new OK({
+      message: "Count All Tasks Succesful! : ",
+      metadata: await getAllTask2ByTaskStatus(),
     }).send(res);
   },
   createTaskController: async (req, res, next) => {

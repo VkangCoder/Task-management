@@ -10,16 +10,16 @@ datasource db {
 model comments {
   id                               Int       @id @default(autoincrement())
   task_id                          Int?
-  user_id                          Int?
   comment                          String?
   created_by                       Int?
   created_at                       DateTime? @default(now()) @db.Timestamp(6)
   updated_by                       Int?
   updated_at                       DateTime? @default(now()) @db.Timestamp(6)
+  comment_type                     String?   @db.VarChar(50)
   users_comments_created_byTousers users?    @relation("comments_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tasks                            tasks?    @relation(fields: [task_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users_comments_updated_byTousers users?    @relation("comments_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_comments_user_idTousers    users?    @relation("comments_user_idTousers", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tasks_tasks_comment_idTocomments tasks[]   @relation("tasks_comment_idTocomments")
 }
 
 model department {
@@ -101,29 +101,33 @@ model task_status {
   updated_time DateTime? @default(now()) @db.Timestamp(6)
   status       Boolean
   created_by   Int?
+  comment_id   Int?
   users        users?    @relation(fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tasks        tasks[]
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model tasks {
-  id                            Int         @id @default(autoincrement())
-  title                         String      @db.VarChar(100)
-  description                   String?
-  created_by                    Int
-  created_at                    DateTime    @default(now()) @db.Timestamp(6)
-  updated_by                    Int?
-  updated_at                    DateTime?   @db.Timestamp(6)
-  current_status_id             Int
-  status                        Boolean
-  department_id                 Int?
-  task_types_id                 Int
-  comments                      comments[]
-  department                    department? @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_department")
-  task_types                    task_types  @relation(fields: [task_types_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tasks_type")
-  users_tasks_created_byTousers users       @relation("tasks_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  task_status                   task_status @relation(fields: [current_status_id], references: [id])
-  users_tasks_updated_byTousers users?      @relation("tasks_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                                  Int         @id @default(autoincrement())
+  title                               String      @db.VarChar(100)
+  description                         String?
+  created_by                          Int
+  created_at                          DateTime    @default(now()) @db.Timestamp(6)
+  updated_by                          Int?
+  updated_at                          DateTime?   @db.Timestamp(6)
+  current_status_id                   Int
+  status                              Boolean
+  department_id                       Int?
+  task_types_id                       Int
+  comment_id                          Int?
+  file_url                            String?
+  comments                            comments[]
+  comments_tasks_comment_idTocomments comments?   @relation("tasks_comment_idTocomments", fields: [comment_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_comment_id")
+  department                          department? @relation(fields: [department_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_department")
+  task_types                          task_types  @relation(fields: [task_types_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_tasks_type")
+  users_tasks_created_byTousers       users       @relation("tasks_created_byTousers", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  task_status                         task_status @relation(fields: [current_status_id], references: [id])
+  users_tasks_updated_byTousers       users?      @relation("tasks_updated_byTousers", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -148,7 +152,6 @@ model users {
   notification_id                                     Int?
   comments_comments_created_byTousers                 comments[]         @relation("comments_created_byTousers")
   comments_comments_updated_byTousers                 comments[]         @relation("comments_updated_byTousers")
-  comments_comments_user_idTousers                    comments[]         @relation("comments_user_idTousers")
   department_department_created_byTousers             department[]       @relation("department_created_byTousers")
   department_department_manager_idTousers             department[]       @relation("department_manager_idTousers")
   menu_role_menu_role_created_byTousers               menu_role[]        @relation("menu_role_created_byTousers")
