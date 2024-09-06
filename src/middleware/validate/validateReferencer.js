@@ -96,4 +96,15 @@ module.exports = {
       throw new NotFoundError("Id Department không tồn tại ");
     }
   },
+  validateParentComentId: async (id) => {
+    const isExistParentComment = await prisma.comments.findUnique({
+      where: { id: id },
+      select: {
+        id: true,
+      },
+    });
+    if (!isExistParentComment) {
+      throw new NotFoundError("Id Comment cha không tồn tại ");
+    }
+  },
 };
