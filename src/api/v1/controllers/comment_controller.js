@@ -1,29 +1,14 @@
+"use strict";
 const { OK, CREATED } = require("../../../core/success.response.js");
-const {
-  getAllCommentsService,
-  createCommentsService,
-} = require("../services/comment_service.js");
+const { createComment } = require("../services/comment_service.js");
 
-module.exports = {
-  getAllCommentsController: async (req, res, next) => {
-    new OK({
-      message: "Get All Comments Succesful! : ",
-      metadata: await getAllCommentsService(req.query),
-    }).send(res);
-  },
-  //   getAllCommentsByUserIdController: async (req, res, next) => {
-  //     const UserId = req.payload.userId;
-  //     new OK({
-  //       message: "Get All Comments Succesful! : ",
-  //       metadata: await getAllCommentsServiceByUserId(req.query, UserId),
-  //     }).send(res);
-  //   },
-  createCommentController: async (req, res, next) => {
-    const UserId = req.payload.userId;
-
+class comment_controller {
+  createComment = async (req, res, next) => {
+    const userId = req.payload.userId;
     new CREATED({
-      message: "Create  Comments Succesful! : ",
-      metadata: await createCommentsService(req.body, UserId),
+      message: "create succesful",
+      metadata: await createComment(req.body, userId),
     }).send(res);
-  },
-};
+  };
+}
+module.exports = new comment_controller();

@@ -7,92 +7,118 @@ const {
 } = require("../../../core/error.response");
 const { buildWhereClause } = require("../../../utils/searchUtils");
 const {
-  validatedUserId,
-  validateRefDepartment,
-  validateRefTaskType,
-  validatedReFTaskId,
   validateParentComentId,
 } = require("../../../middleware/validate/validateReferencer");
 const { format } = require("date-fns");
-const { createNotificationService } = require("./notification_service");
-//hàm tìm max right của 1 comment
-async function getMaxRight(prisma, taskId) {
-  const maxRightResult = await prisma.comments.aggregate({
-    where: { task_id: taskId },
-    _max: { comment_right: true },
+//
+//hàm tìm max node right của 1 comments
+async function getMaxRightValue(prisma, task_id) {
+  const lastComment = await prisma.comments.findFirst({
+    where: { task_id: task_id },
+    orderBy: { comment_right: "desc" },
   });
-  return maxRightResult._max.comment_right || 0; // Nếu null, giá trị mặc định là 0
+  return lastComment ? lastComment.comment_right : 0;
 }
 
 //update lại các node khi có 1 comment mới xuất hiện
-async function updateCommentTree(prisma, left, right) {
-  await prisma.comments.updateMany({
-    where: { comment_right: { gte: left } },
-    data: { comment_right: { increment: 2 } },
+async function insertNestedComment(
+  prisma,
+  task_id,
+  userId,
+  content,
+  parentCommentId
+) {
+  const parentComment = await prisma.comments.findUnique({
+    where: { id: parentCommentId },
+    select: { comment_right: true },
   });
+
+  const right = parentComment.comment_right;
+  const left = right; // Comment mới sẽ nằm ngay sau parent comment
+
+  // Cập nhật các giá trị comment_right và comment_left của các comment hiện có
   await prisma.comments.updateMany({
-    where: { comment_left: { gte: left } },
-    data: { comment_left: { increment: 2 } },
+    where: {
+      OR: [{ comment_right: { gte: right } }, { comment_left: { gte: left } }],
+    },
+    data: {
+      comment_right: { increment: 2 },
+      comment_left: { increment: 2 },
+    },
+  });
+
+  // Tạo comment mới
+  return prisma.comments.create({
+    data: {
+      task_id: task_id,
+      content: content,
+      parent_comment_id: parentCommentId,
+      created_by: userId,
+      comment_right: right + 1,
+      comment_left: left,
+    },
   });
 }
-module.exports = {
-  createCommentsService: async (Comments, userId) => {
-    //Bước 1 check validate các trường tham chiếu ( khóa ngoiaj)
+class CommentService {
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
+  static async createComment(CommentData, userId) {
+    let rightValue;
+    if (CommentData.parent_comment_id) {
+      //reply comment
+      //lấy ra giá trị right của comment cha
+      await validateParentComentId(CommentData.parent_comment_id);
 
-    await validatedReFTaskId(Comments.task_id);
-
-    //Nếu có parent comment Id
-    if (Comments.parent_comment_id) {
-      await validateParentComentId(Comments.parent_comment_id);
-    }
-    //B2 : tạo transaction
-
-    return await prisma.$transaction(async (prisma) => {
-      let left, right;
-
-      //nếu có truyền vào comment cha thì có nghĩa là comment này đang là phản hồi
-
-      if (Comments.parent_comment_id) {
-        //lấy ra giá trị right của comment cha
-
-        const parentComment = await prisma.comments.findUnique({
-          where: { id: Comments.parent_comment_id },
-          select: { comment_right: true },
-        });
-        //comment mới dc tạo ra phải nằm giữa node left và right của comment cha
-        // => ví dụ cha là 1,2 thì comment reply phải là 2,3 và comment cha tăng thành 1,4
-        left = parentComment.comment_right;
-        right = parentComment.comment_right + 1;
-        // cập nhật toàn bộ giá trị left và right của tất cả comment khác
-        // nếu nó lớn hơn comment node right của comment reply tăng lên 2
-
-        //
-        await updateCommentTree(prisma, left, right);
-
-        await prisma.comments.update({
-          where: { id: Comments.parent_comment_id },
-          data: { comment_right: right + 1 },
-        });
-      } else {
-        // Tạo bình luận gốc, tìm giá trị `right` lớn nhất hiện có
-        const maxRight = await getMaxRight(prisma, Comments.task_id);
-
-        left = maxRight + 1;
-        right = maxRight + 2;
-      }
-
-      const newComment = await prisma.comments.create({
-        data: {
-          task_id: Comments.task_id,
-          content: Comments.content,
-          parent_comment_id: Comments.parent_comment_id,
-          created_by: userId,
-          created_at: new Date(),
-          comment_left: left,
-          comment_right: right,
-        },
+      return await insertNestedComment(
+        prisma,
+        CommentData.task_id,
+        userId,
+        CommentData.content,
+        CommentData.parent_comment_id
+      );
+    } else {
+      const maxRightValue = await prisma.comments.findFirst({
+        where: { task_id: CommentData.task_id },
+        orderBy: { comment_right: "desc" },
       });
-      return newComment;
+      if (maxRightValue) rightValue = maxRightValue.comment_right + 1;
+      else {
+        rightValue = 1;
+      }
+    }
+
+    return await prisma.comments.create({
+      data: {
+        task_id: CommentData.task_id,
+        created_by: userId,
+        content: CommentData.content,
+        comment_right: rightValue + 1,
+        comment_left: rightValue,
+        created_at: new Date(),
+      },
     });
-  },
-};
+  }
+}
+
+module.exports = CommentService;
+//   getCommentInTaskService: async (queryParams) => {
+//     const { filterField, operator, value, page, limit } = queryParams;
+
+//     // Fetch all with pagination
+//     const pageNum = parseInt(page) || 1; // Mặc định là trang 1 nếu không được cung cấp
+//     const pageSize = parseInt(limit) || 10; // Mặc định 10 sản phẩm mỗi trang nếu không được cung cấp
+//     const skip = (pageNum - 1) * pageSize;
+//     const where = await buildWhereClause({ filterField, operator, value });
+//     //sort DESC
+//     const orderBy = { comment_left: "asc" }; // Thay 'desc' bằng 'asc' nếu bạn muốn sắp xếp tăng dần
+//     //
+//     let Comments = await prisma.comments.findMany({
+//       skip: skip,
+//       take: pageSize,
+//       where,
+//       orderBy,
+//     });
+//     return Comments;
+//   },
+// };

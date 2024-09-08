@@ -4,23 +4,24 @@ const { verifyAccessToken } = require("../services/jwt_service");
 const asyncHandler = require("../../../middleware/handleError");
 const { checkRolePermission } = require("../../../middleware/role_middleware");
 const {
-  getAllCommentsController,
+  getAllCommentsByTaskIdController,
   createCommentController,
 } = require("../controllers/comment_controller");
+const comment_controller = require("../controllers/comment_controller");
 const CommentRoutes = express.Router();
 
 CommentRoutes.get(
-  "/getAllComments",
+  "/getAllCommentByTaskId",
   verifyAccessToken,
-  //   checkRolePermission("Read"),
-  asyncHandler(getAllCommentsController)
+  checkRolePermission("Read"),
+  asyncHandler(getAllCommentsByTaskIdController)
 );
 
 CommentRoutes.post(
   "/createComments",
   verifyAccessToken,
   checkRolePermission("Create"),
-  asyncHandler(createCommentController)
+  asyncHandler(comment_controller.createComment)
 );
 
 module.exports = { CommentRoutes };
