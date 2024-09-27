@@ -49,6 +49,7 @@ const uploadImageFromLocal = async (filePath, userId) => {
     };
   }
 
+  
   // Nếu tải ảnh thành công, tiếp tục cập nhật database trong một transaction
   try {
     const result = await prisma.$transaction(async (prisma) => {

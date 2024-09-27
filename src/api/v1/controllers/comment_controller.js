@@ -2,7 +2,8 @@
 const { OK, CREATED } = require("../../../core/success.response.js");
 const {
   createComment,
-  getAllCommentsByTaskID,
+  getCommentsByParentId,
+  deleteComments,
 } = require("../services/comment_service.js");
 
 class comment_controller {
@@ -14,9 +15,15 @@ class comment_controller {
     }).send(res);
   };
   getListCommentsByTaskId = async (req, res, next) => {
-    new CREATED({
-      message: "create succesful",
-      metadata: await getAllCommentsByTaskID(req.query),
+    new OK({
+      message: "get List succesful",
+      metadata: await getCommentsByParentId(req.query),
+    }).send(res);
+  };
+  deleteComment = async (req, res, next) => {
+    new OK({
+      message: "delete succesful",
+      metadata: await deleteComments(req.body),
     }).send(res);
   };
 }
